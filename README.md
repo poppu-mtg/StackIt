@@ -13,3 +13,22 @@ Already in development is: (1) support for other TCG's: Pokemon, Hex are the mai
 
 
 Finally, I would like to thank the community for its incredible feedback and support. What started as a small pet project for myself quickly blew up and is now being posted here on GitHub. It feels both awesome and surreal!
+
+
+** Run the script (Beta version)
+
+From the command prompt:
+> python StackIt.py decklist.dec
+
+The decklist name does not really matter in the Beta version, as long as the extension does not exceed 3 characters (.dec, .mtg or other). The output file will be an image file named 'decklist.png'.
+
+
+** Sample input decklist format
+
+The decklist file should look like this:
+
+4 / Gifts Ungiven / 
+4 / Pyretic Ritual /
+...
+
+The separation ' / ' is necessary in the current Beta version to match the coded parsing method. This can (should?) eventually be improved on. The user can request a specific card art by adding the 3 letter code of the corresponding set - e.g. KLD for Kaladesh.
