@@ -40,3 +40,5 @@ The decklist file should look like this:
 ...  
 
 The separation ' / ' is necessary in the current Beta version to match the coded parsing method. This can (should?) eventually be improved on. The user can request a specific card art by adding the 3 letter code of the corresponding set - e.g. KLD for Kaladesh.
+
+To test the Beta version, the decklist StressTest1.dec is provided.
