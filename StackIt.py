@@ -79,28 +79,89 @@ for lines in decklist:
     isitland = 0
     isitspecland = 0
 
+    #reset the new parser
+    set = ' '
+#    quant_stack = []
+#    quant_tot = ''
+#    name_stack = []
+#    name_tot = ''
+
     if lines[0] == '#':
         continue
 
-    data = lines.split(" / ")
-
-    quantity = int(data[0])
-    name = data[1]
-
-    print len(data), data
-
     #this step checks whether a specific art is requested by the user - provided via the set name
 
-    if data[2] != "\n":
+    if lines.find('/') != -1:
         
-        setcost = data[2].split(" ")
-        set = re.sub('([A-Z]{1})', r'\1',setcost[0]).lower()
-        if setcost[1] == "\n":
-            cost = "*\n"
+        data = lines.split(" / ")
+
+        #split the info at the first blank space
+        quantity = int(data[0].split(" ",1)[0])
+        name = data[0].split(" ",1)[1]
+
+        if quantity == 0:
+            continue
+        
+        set = data[1].split("\n")[0].lower()
+
+        for landtype in basics:
+        
+            if name.lower() == landtype:
+        
+                isitland = 1
+
+        if isitland != 1:
+
+            #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
+            name_sub = name.replace(",","")
+            name_sub = name_sub.replace("'"," ")
+            print name_sub
+
+            cmcsearch = name_sub.replace(" ","+")
+            scansearch = name_sub.replace(" s ","s ")
+            scansearch = scansearch.replace(" ","-")
+            scansearch = scansearch.lower()
+            print cmcsearch,scansearch
+
+            os.system("curl 'http://www.mtgvault.com/cards/search/?q="+cmcsearch+"&searchtype=name' | grep -i 'card info' > tempcmc")
+
+            cmcdata = open('tempcmc', 'r')
+
+            for lines in cmcdata:
+        
+                if lines.find("Land") != -1:
+                    isitspecland = 1
+                    continue
+
+                cmc_part1 = lines.split(" {")[1]
+                cmc_part2 = cmc_part1.split("}<")[0]
+                altcmc = cmc_part2.split("}{")
+                altcmc = [specmana[x] for x in altcmc]
+                print name,altcmc
+
+            cmcdata.close()
+
+            os.system("rm -r tempcmc")
+
+            if isitspecland == 1:
+                cost = "*\n"
+            else:
+                cost = "".join(altcmc)+"\n"
+
         else:
-            cost = setcost[1]
+
+            cost = "*\n"
+
+        print name,set,cost
 
     else:
+        
+        #split the info at the first blank space
+        quantity = int(lines.split(" ",1)[0])
+        name = lines.split(" ",1)[1][:-1]
+
+        if quantity == 0:
+            continue
         
         for landtype in basics:
         
