@@ -1,11 +1,12 @@
 # StackIt
 
-Python script generating a column-shaped TCG decklist based on cropped captions of each card's art.
+Python2 script generating a column-shaped TCG decklist based on cropped captions of each card's art.
 
 
 This script was written on a Mac OSX Sierra (10.12.3) and as such relies on a couple of specific items:  
-  (1) python's PIL library, to handle and create Images as needed;  
-  (2) the shell command 'curl' to lookup the html code of the webpages containing the information we are looking for (card scan, set, mana cost).
+  (1) Python 2.7
+  (2) python's PIL library, to handle and create Images as needed;  
+  (3) the shell command 'curl' to lookup the html code of the webpages containing the information we are looking for (card scan, set, mana cost).
   
   
 The initial upload is the version of the script as of March 7, 2017: it allows generating a visual decklist for Magic: the Gathering decks. The main features of this version are:  
