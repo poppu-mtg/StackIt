@@ -4,7 +4,7 @@ Python2 script generating a column-shaped TCG decklist based on cropped captions
 
 
 This script was written on a Mac OSX Sierra (10.12.3) and as such relies on a couple of specific items:  
-  (1) Python 2.7
+  (1) Python 2.7  
   (2) python's PIL library, to handle and create Images as needed;  
   (3) the shell command 'curl' to lookup the html code of the webpages containing the information we are looking for (card scan, set, mana cost).
   
