@@ -123,7 +123,7 @@ for lines in decklist:
             scansearch = scansearch.lower()
             print cmcsearch,scansearch
 
-            os.system("curl 'http://www.mtgvault.com/cards/search/?q="+cmcsearch+"&searchtype=name' | grep -i 'card info' > tempcmc")
+            os.system('curl "http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name" | grep -i "card info" > tempcmc'.format(cmcsearch=cmcsearch))
 
             cmcdata = open('tempcmc', 'r')
 
@@ -182,7 +182,7 @@ for lines in decklist:
             scansearch = scansearch.lower()
             print cmcsearch,scansearch
 
-            os.system("curl 'http://www.mtgvault.com/cards/search/?q="+cmcsearch+"&searchtype=name' | grep -i 'card info' > tempcmc")
+            os.system('curl "http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name" | grep -i "card info" > tempcmc'.format(cmcsearch=cmcsearch))
 
             cmcdata = open('tempcmc', 'r')
 
@@ -202,7 +202,7 @@ for lines in decklist:
 
             scankey = "<a href=" + '"' + "/card/" + scansearch + '/'
 
-            os.system("curl 'http://www.mtgvault.com/cards/search/?q="+cmcsearch+"&searchtype=name' | grep -i 'card_image' > tempscan")
+            os.system('curl "http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name" | grep -i "card_image" > tempscan'.format(cmcsearch=cmcsearch))
 
             scandata = open('tempscan', 'r')
 
@@ -235,7 +235,7 @@ for lines in decklist:
 
     #all card arts are found on magiccards.info
     fetch = "grep -i "+'"'+">"+name+'"'+" temp > output"
-    setcurl = "curl 'http://magiccards.info/"+set+"/en.html' > temp"
+    setcurl = 'curl "http://magiccards.info/{set}/en.html" > temp'.format(set=set)
 
     os.system(setcurl)
     os.system(fetch)
