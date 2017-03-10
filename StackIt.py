@@ -123,7 +123,7 @@ for lines in decklist:
             scansearch = scansearch.lower()
             print cmcsearch,scansearch
 
-            os.system("curl 'http://www.mtgvault.com/cards/search/?q="+cmcsearch+"&searchtype=name' | grep -i 'card info' > tempcmc")
+            os.system('curl "http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name" | grep -i "card info" > tempcmc'.format(cmcsearch=cmcsearch))
 
             cmcdata = open('tempcmc', 'r')
 
