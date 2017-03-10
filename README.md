@@ -36,10 +36,10 @@ The decklist name does not really matter in the Beta version, as long as the ext
 
 The decklist file should look like this:
 
-4 / Gifts Ungiven /   
-4 / Pyretic Ritual /  
+4 Gifts Ungiven  
+4 Vendilion Clique / MM2 
 ...  
 
-The separation ' / ' is necessary in the current Beta version to match the coded parsing method. This can (should?) eventually be improved on. The user can request a specific card art by adding the 3 letter code of the corresponding set - e.g. KLD for Kaladesh.
+The separation ' / ' is necessary in the current Beta version to request a specific card art by adding the 3 letter code of the corresponding set - e.g. MM2 for the Modern Master 2015 art of Vendilion Clique.
 
 To test the Beta version, the decklist StressTest1.dec is provided.
