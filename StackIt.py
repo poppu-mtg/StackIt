@@ -112,7 +112,7 @@ for x in range(64):
 #create a header with the deck's name
 title = Image.new("RGB", (280,34), "black")
 drawtitle = ImageDraw.Draw(title)
-drawtitle.text((10, 7),str(sys.argv[1])[0:-4],(250,250,250), font=fnt_title)
+drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=fnt_title)
 
 #create a Sideboard partition
 sideboard = Image.new("RGB", (280,34), "black")
@@ -281,7 +281,7 @@ if not isXML:
 
             #split the info at the first blank space
             quantity = int(lines.split(" ",1)[0])
-            name = lines.split(" ",1)[1][:-1]
+            name = lines.split(" ",1)[1].strip()
 
             if quantity == 0:
                 continue
