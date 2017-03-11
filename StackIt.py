@@ -114,6 +114,12 @@ title = Image.new("RGB", (280,34), "black")
 drawtitle = ImageDraw.Draw(title)
 drawtitle.text((10, 7),str(sys.argv[1])[0:-4],(250,250,250), font=fnt_title)
 
+#create a Sideboard partition
+sideboard = Image.new("RGB", (280,34), "black")
+drawtitle = ImageDraw.Draw(sideboard)
+drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
+
+
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
 
@@ -131,18 +137,12 @@ if isXML:
     modoformat = {}
 
     for atype in info.findall('Cards'):
-
         if atype.get('Sideboard') == "true":
             continue
-
         else:
-
             if atype.get('Name') in modoformat:
-
                 modoformat[atype.get('Name')] += int(atype.get('Quantity'))
-
             else:
-
                 modoformat[atype.get('Name')] = int(atype.get('Quantity'))
 
     modonames = list(modoformat.keys())
@@ -188,6 +188,12 @@ if not isXML:
         scan_part1 = ' '
 
         if lines[0] == '#':
+            continue
+        
+        if lines[0] == '\n':
+            # We're at the Sideboard now.
+            deck.paste(sideboard, (0,34*nstep))
+            nstep = nstep + 1
             continue
 
         #this step checks whether a specific art is requested by the user - provided via the set name
