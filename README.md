@@ -2,13 +2,12 @@
 
 Python2 script generating a column-shaped TCG decklist based on cropped captions of each card's art.
 
-
+## Requirements
 This script was written on a Mac OSX Sierra (10.12.3) and as such relies on a couple of specific items:  
-  (1) Python 2.7  
-  (2) python's PIL library, to handle and create Images as needed;  
-  (3) the shell command 'curl' to lookup the html code of the webpages containing the information we are looking for (card scan, set, mana cost).
-  
-  
+  (1) Python 2.7
+  (2) PIL, lxml, and requests (install with `pip install -r requirements.txt`)  
+
+## Roadmap
 The initial upload is the version of the script as of March 7, 2017: it allows generating a visual decklist for Magic: the Gathering decks. The main features of this version are:  
   (1) final picture is generated as a .png file;  
   (2) reads the decklist from a file name given as a variable on the command line (rather than hard-coded in the script, giving user some flexibility);  
@@ -23,7 +22,7 @@ Already in development is:
 
 Finally, I would like to thank the community for its incredible feedback and support. What started as a small pet project for myself quickly blew up and is now being posted here on GitHub. It feels both awesome and surreal!
 
-
+## Usage
 ** Run the script (Beta version)
 
 From the command prompt:
@@ -36,10 +35,14 @@ The decklist name does not really matter in the Beta version, as long as the ext
 
 The decklist file should look like this:
 
+```
 4 Gifts Ungiven  
 4 Vendilion Clique / MM2 
-...  
+```
 
 The separation ' / ' is necessary in the current Beta version to request a specific card art by adding the 3 letter code of the corresponding set - e.g. MM2 for the Modern Master 2015 art of Vendilion Clique.
 
 To test the Beta version, the decklist StressTest1.dec is provided.
+
+## Sample Output
+![Sample Output](StressTest1.png)
