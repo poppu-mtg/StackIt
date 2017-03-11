@@ -12,6 +12,9 @@ import requests
 ncount = 0
 nstep = 1
 
+if not os.path.exists('./Scans'):
+    os.mkdir('./Scans')
+
 storedScans = glob.glob('./Scans/*.jpg')
 storedCMCs = glob.glob('./Scans/*.png')
 
