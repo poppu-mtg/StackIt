@@ -1,11 +1,18 @@
 import os, sys, glob
 import re
 
+#Image manipulation
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+#Check input format
+import mmap
+
+#XML parsing
 import xml.etree.ElementTree
+
+#HTML parsing
 from lxml import html
 import requests
 
@@ -40,6 +47,9 @@ greaterthan9 = 0
 adjustcmc = 0
 check9 = '0123456'
 
+#check the input format
+isXML = False
+
 # create a horizontal gradient...
 gradient = Image.new('L', (255,1))
 
@@ -62,16 +72,50 @@ title = Image.new("RGB", (280,34), "black")
 drawtitle = ImageDraw.Draw(title)
 drawtitle.text((10, 7),str(sys.argv[1])[0:-4],(250,250,250), font=fnt_title)
 
-#user input as decklist
+#open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
 
-#check for readable content
-for lines1 in decklist1:
+#determine if input decklist is in XML format
+isDeckXML = mmap.mmap(decklist1.fileno(), 0, access=mmap.ACCESS_READ)
+if isDeckXML.find('xml') != -1:
+    print 'Warning - input decklist is in XML format'
+    isXML = True
     
-    if lines1[0] == '#':
-        continue
+#check for readable content
+if isXML:
 
-    ncount = ncount +1
+    info = xml.etree.ElementTree.parse(str(sys.argv[1])).getroot()
+
+    modoformat = {}
+
+    for atype in info.findall('Cards'):
+
+        if atype.get('Sideboard') == "true":
+            continue
+
+        else:
+
+            if atype.get('Name') in modoformat:
+
+                modoformat[atype.get('Name')] += int(atype.get('Quantity'))
+
+            else:
+
+                modoformat[atype.get('Name')] = int(atype.get('Quantity'))
+
+    modonames = list(modoformat.keys())
+    modoquant = [modoformat[x] for x in modonames]
+    ncount = len(modonames)
+    print ncount, modonames, modoquant
+    
+else:
+
+    for lines1 in decklist1:
+    
+        if lines1[0] == '#':
+            continue
+
+        ncount = ncount +1
 
 decklist1.close()
 
@@ -84,119 +128,343 @@ deck = Image.new("RGB", (deckwidth, deckheight), "white")
 deck.paste(title, (0,0))
 
 #now read the decklist
-decklist = open(str(sys.argv[1]), 'r')
+if not isXML:
 
-for lines in decklist:
-    
-    ncount_card = 0
+    #parse an ASCII decklist
+    decklist = open(str(sys.argv[1]), 'r')
 
-    #necessary for appropriate treatment of the missing mana cost of lands
-    isitland = 0
-    isitspecland = 0
+    for lines in decklist:
 
-    #reset the new parser
-    set = ' '
-    scan_part1 = " "
+        ncount_card = 0
 
-    if lines[0] == '#':
-        continue
+        #necessary for appropriate treatment of the missing mana cost of lands
+        isitland = 0
+        isitspecland = 0
 
-    #this step checks whether a specific art is requested by the user - provided via the set name
+        #reset the new parser
+        set = ' '
+        scan_part1 = ' '
 
-    if lines.find('/') != -1:
-        
-        data = lines.split(" / ")
-
-        #split the info at the first blank space
-        quantity = int(data[0].split(" ",1)[0])
-        name = data[0].split(" ",1)[1]
-
-        if quantity == 0:
+        if lines[0] == '#':
             continue
-        
-        set = data[1].split("\n")[0].lower()
 
-        for landtype in basics:
-        
-            if name.lower() == landtype:
-        
-                isitland = 1
+        #this step checks whether a specific art is requested by the user - provided via the set name
 
-        if isitland != 1:
+        if lines.find('/') != -1:
 
-            #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
-            name_sub = name.replace(",","")
-            name_sub = name_sub.replace("'"," ")
-            print name_sub
+            data = lines.split(" / ")
 
-            cmcsearch = name_sub.replace(" ","+")
-            scansearch = name_sub.replace(" s ","s ")
-            scansearch = scansearch.replace(" ","-")
-            scansearch = scansearch.lower()
-            print cmcsearch,scansearch
+            #split the info at the first blank space
+            quantity = int(data[0].split(" ",1)[0])
+            name = data[0].split(" ",1)[1]
 
-            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name&s={set}'.format(cmcsearch=cmcsearch,set=set)
+            if quantity == 0:
+                continue
 
-            cmcpage = requests.get(cmcweb)
-            cmctree = html.fromstring(cmcpage.content)
+            set = data[1].split("\n")[0].lower()
 
-            scankey = "/card/" + scansearch + '/'
+            for landtype in basics:
 
-            cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-#            print cmcscan
-            for item in cmcscan:
-#                print item,ncount_card
-                if scan_part1 != " ":
-                    continue
-                if item.find(scankey) == 0:
-                    print "found it:",item
-                    scan_part1 = item.split(scankey)[1]
-                ncount_card = ncount_card + 1
+                if name.lower() == landtype:
 
-            cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
-            print cmctext
+                    isitland = 1
 
-            finallist = []
-            for item in cmctext:
-                if item[-1] == "}":
-                    finallist.append(item)
-            print finallist
-            
-            if cmctext[0].find("Land") != -1:
-                isitspecland = 1
+            if isitland != 1:
+
+                #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
+                name_sub = name.replace(",","")
+                name_sub = name_sub.replace("'"," ")
+                print name_sub
+
+                cmcsearch = name_sub.replace(" ","+")
+                scansearch = name_sub.replace(" s ","s ")
+                scansearch = scansearch.replace(" ","-")
+                scansearch = scansearch.lower()
+                print cmcsearch,scansearch
+
+                cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name&s={set}'.format(cmcsearch=cmcsearch,set=set)
+
+                cmcpage = requests.get(cmcweb)
+                cmctree = html.fromstring(cmcpage.content)
+
+                scankey = "/card/" + scansearch + '/'
+
+                cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
+    #            print cmcscan
+                for item in cmcscan:
+    #                print item,ncount_card
+                    if scan_part1 != " ":
+                        continue
+                    if item.find(scankey) == 0:
+                        print "found it:",item
+                        scan_part1 = item.split(scankey)[1]
+                    ncount_card = ncount_card + 1
+
+                cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
+                print cmctext
+
+                finallist = []
+                for item in cmctext:
+                    if item[-1] == "}":
+                        finallist.append(item)
+                print finallist
+
+                if cmctext[0].find("Land") != -1:
+                    isitspecland = 1
+                else:
+    #                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
+                    cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
+                    altcmc = cmc_part1.split("}{")
+                    altcmc = [specmana[x] for x in altcmc]
+                    print name,altcmc
+
+                if isitspecland == 1:
+                    cost = "*\n"
+                else:
+                    cost = "".join(altcmc)+"\n"
+
             else:
-#                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
-                cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
-                altcmc = cmc_part1.split("}{")
-                altcmc = [specmana[x] for x in altcmc]
-                print name,altcmc
 
-            if isitspecland == 1:
                 cost = "*\n"
-            else:
-                cost = "".join(altcmc)+"\n"
+
+            print name,set,cost
 
         else:
 
-            cost = "*\n"
+            #split the info at the first blank space
+            quantity = int(lines.split(" ",1)[0])
+            name = lines.split(" ",1)[1][:-1]
 
-        print name,set,cost
+            if quantity == 0:
+                continue
 
-    else:
+            for landtype in basics:
+
+                if name.lower() == landtype:
+
+                    isitland = 1
+
+            if isitland != 1:
+
+                #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
+                name_sub = name.replace(",","")
+                name_sub = name_sub.replace("'"," ")
+                print name_sub
+
+                cmcsearch = name_sub.replace(" ","+")
+                scansearch = name_sub.replace(" s ","s ")
+                scansearch = scansearch.replace(" ","-")
+                scansearch = scansearch.lower()
+                print cmcsearch,scansearch
+
+                cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
+
+                cmcpage = requests.get(cmcweb)
+                cmctree = html.fromstring(cmcpage.content)
+
+                scankey = "/card/" + scansearch + '/'
+
+                cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
+    #            print cmcscan
+                for item in cmcscan:
+    #                print item,ncount_card
+                    if scan_part1 != " ":
+                        continue
+                    if item.find(scankey) == 0:
+                        print "found it:",item
+                        scan_part1 = item.split(scankey)[1]
+                    ncount_card = ncount_card + 1
+                altscan = str(scan_part1.split('/"')[0]).lower()
+
+                set = altscan[:-1]
+
+                cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
+                print cmctext
+
+                finallist = []
+                for item in cmctext:
+                    if item[-1] == "}":
+                        finallist.append(item)
+                print finallist
+
+                if cmctext[0].find("Land") != -1:
+                    isitspecland = 1
+                else:
+    #                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
+                    cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
+                    altcmc = cmc_part1.split("}{")
+                    altcmc = [specmana[x] for x in altcmc]
+                    print name,altcmc
+
+                if isitspecland == 1:
+                    cost = "*\n"
+                else:
+                    cost = "".join(altcmc)+"\n"
+                print name,set,cost
+
+            else:
+
+                #all basic lands will be using Unhinged card art
+                set = "uh"
+                cost = "*\n"
+
+        #all card arts are found on magiccards.info
+    #    cmcscan = cmctree.xpath('//a[img]/@href')
+
+        scanweb = 'http://www.magiccards.info/{set}/en.html'.format(set=set)
+        scanpage = requests.get(scanweb)
+        scantree = html.fromstring(scanpage.content)
+
+        scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
+        print scannumber
+        for item in scannumber:
+            if item.find("/en/"):
+    #            cardloc = scannumber[0][:-4].split("/")
+                cardloc = item[:-4].split("/")
+        print cardloc
+
+        name2 = ''.join(e for e in name if e.isalnum())
+        localname = name2+'_'+set+'.jpg'
+
+        #get the jpg file of the card scan -- ONLY if not already in Scans/
+        lookupScan = './Scans/'+localname
+    #    print "lookupScan = ",lookupScan
+
+        if lookupScan in storedScans:
+            print "Card art already been used, loading..."
+        else:
+            cardpic = 'curl -O http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
+            os.system(cardpic)
+            #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
+            rename = 'mv '+cardloc[3]+'jpg Scans/'+localname
+            os.system(rename)
+
+        img = Image.open('Scans/'+localname)
+
+        #check if im has Alpha band...
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+
+        #resize the gradient to the size of im...
+        alpha = gradient.resize(img.size)
+
+        #put alpha in the alpha band of im...
+        img.putalpha(alpha)
+
+        bkgd = Image.new("RGB", img.size, "black")
+        bkgd.paste(img, (0,0), mask=img)
+
+        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+
+        draw = ImageDraw.Draw(cut)
+        #create text outline
+        draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        #enter text
+        draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+
+        cmc = Image.new('RGBA',(16*len(cost), 16))
+
+        lookupCMC = './Scans/'+name2+'_'+set+'_cmc.png'
+
+        if lookupCMC in storedCMCs:
+
+            print "Card CMC' already been used, loading..."
+            tap0 = Image.open(lookupCMC)
+
+            if tap0.mode != 'RGBA':
+                tap0 = tap0.convert('RGBA')
+
+            cmc.paste(tap0, (0,0), mask=tap0)
+
+            #still need to check cost adjustment...
+            for n in range(len(cost)-1):
+                if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
+                    adjustcmc = 1
+
+        else:
+
+            for n in range(len(cost)-1):
+
+                #reset the large mana cost markers
+                if greaterthan9 == 1:
+                    greaterthan9 = 0
+                    adjustcmc = 1
+                    continue
+
+                #lands have no mana cost and are tagged with '*'
+                if cost[n] == "*":
+                    continue
+
+                else:
+                    if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
+                        finalcost = cost[n]+cost[n+1]
+                        greaterthan9 = 1
+                    else:
+                        finalcost = cost[n]
+
+                    symbol = 'Mana/Mana_'+finalcost+'.png'
+
+                    tap0 = Image.open(symbol)
+                    if tap0.mode != 'RGBA':
+                        tap0 = tap0.convert('RGBA')
+
+                    tap = tap0.resize((16,16))
+
+                    cmc.paste(tap, (15*n,0), mask=tap)
+
+            cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
+
+        #place the cropped picture of the current card
+        deck.paste(cut, (0,34*nstep))
+
+        #adjust cmc size to reflex manacost greater than 9
+        if adjustcmc == 1:
+            deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
+            adjustcmc = 0
+        else:
+            deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
+
+    #    os.system('rm -r '+name2+'.jpg')
+    #    if cost[n] != "*":
+    #        os.system('rm -r '+name2+'.png')
+    #        os.system('rm -r '+name2+'_cmc.png')
+
+        nstep = nstep+1
+
+    decklist.close()
+
+else:
+
+    #parse the XML decklist
+    doitFirst = []
+    doitLast = []
+    sizeFirst = 0
+    sizeLast = 0
+    
+    for n in range(ncount):
+    
+        ncount_card = 0
+
+        #necessary for appropriate treatment of the missing mana cost of lands
+        isitland = 0
+        isitspecland = 0
+
+        #reset the new parser
+        set = ' '
+        scan_part1 = ' '
         
-        #split the info at the first blank space
-        quantity = int(lines.split(" ",1)[0])
-        name = lines.split(" ",1)[1][:-1]
+        name = modonames[n]
+        quantity = modoquant[n]
 
-        if quantity == 0:
-            continue
-        
         for landtype in basics:
-        
             if name.lower() == landtype:
-        
                 isitland = 1
 
+#        print quantity,name,isitland
+    
         if isitland != 1:
 
             #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
@@ -218,9 +486,7 @@ for lines in decklist:
             scankey = "/card/" + scansearch + '/'
 
             cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-#            print cmcscan
             for item in cmcscan:
-#                print item,ncount_card
                 if scan_part1 != " ":
                     continue
                 if item.find(scankey) == 0:
@@ -228,7 +494,7 @@ for lines in decklist:
                     scan_part1 = item.split(scankey)[1]
                 ncount_card = ncount_card + 1
             altscan = str(scan_part1.split('/"')[0]).lower()
-            
+
             set = altscan[:-1]
 
             cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
@@ -239,11 +505,10 @@ for lines in decklist:
                 if item[-1] == "}":
                     finallist.append(item)
             print finallist
-            
+
             if cmctext[0].find("Land") != -1:
                 isitspecland = 1
             else:
-#                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
                 cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
                 altcmc = cmc_part1.split("}{")
                 altcmc = [specmana[x] for x in altcmc]
@@ -261,134 +526,150 @@ for lines in decklist:
             set = "uh"
             cost = "*\n"
 
-    #all card arts are found on magiccards.info
-#    cmcscan = cmctree.xpath('//a[img]/@href')
-
-    scanweb = 'http://www.magiccards.info/{set}/en.html'.format(set=set)
-    scanpage = requests.get(scanweb)
-    scantree = html.fromstring(scanpage.content)
-
-    scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
-    print scannumber
-    for item in scannumber:
-        if item.find("/en/"):
-#            cardloc = scannumber[0][:-4].split("/")
-            cardloc = item[:-4].split("/")
-    print cardloc
-    
-    name2 = ''.join(e for e in name if e.isalnum())
-    localname = name2+'_'+set+'.jpg'
-
-    #get the jpg file of the card scan -- ONLY if not already in Scans/
-    lookupScan = './Scans/'+localname
-#    print "lookupScan = ",lookupScan
-    
-    if lookupScan in storedScans:
-        print "Card art already been used, loading..."
-    else:
-        cardpic = 'curl -O http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
-        os.system(cardpic)
-        #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
-        rename = 'mv '+cardloc[3]+'jpg Scans/'+localname
-        os.system(rename)
-
-    img = Image.open('Scans/'+localname)
-
-    #check if im has Alpha band...
-    if img.mode != 'RGBA':
-        img = img.convert('RGBA')
-
-    #resize the gradient to the size of im...
-    alpha = gradient.resize(img.size)
-
-    #put alpha in the alpha band of im...
-    img.putalpha(alpha)
-
-    bkgd = Image.new("RGB", img.size, "black")
-    bkgd.paste(img, (0,0), mask=img)
-
-    cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
-
-    draw = ImageDraw.Draw(cut)
-    #create text outline
-    draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    #enter text
-    draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
-
-    cmc = Image.new('RGBA',(16*len(cost), 16))
-
-    lookupCMC = './Scans/'+name2+'_'+set+'_cmc.png'
-
-    if lookupCMC in storedCMCs:
-
-        print "Card CMC' already been used, loading..."
-        tap0 = Image.open(lookupCMC)
+        print quantity,name,set,cost
         
-        if tap0.mode != 'RGBA':
-            tap0 = tap0.convert('RGBA')
+        if cost == "*\n":
+            doitLast.append(quantity)
+            doitLast.append(name)
+            doitLast.append(set)
+            doitLast.append(cost)
+            sizeLast = sizeLast + 1
+        else:
+            doitFirst.append(quantity)
+            doitFirst.append(name)
+            doitFirst.append(set)
+            doitFirst.append(cost)
+            sizeFirst = sizeFirst + 1
 
-        cmc.paste(tap0, (0,0), mask=tap0)
+    doitAll = doitFirst+doitLast
+    sizeAll = sizeFirst+sizeLast
+    print doitAll,sizeAll
+            
+    for nAll in range(sizeAll):
+        quantity = doitAll[0+4*nAll]
+        name = doitAll[1+4*nAll]
+        set = doitAll[2+4*nAll]
+        cost = doitAll[3+4*nAll]
 
-        #still need to check cost adjustment...
-        for n in range(len(cost)-1):
-            if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
-                adjustcmc = 1
-        
-    else:
-        
-        for n in range(len(cost)-1):
+        scanweb = 'http://www.magiccards.info/{set}/en.html'.format(set=set)
+        scanpage = requests.get(scanweb)
+        scantree = html.fromstring(scanpage.content)
 
-            #reset the large mana cost markers
-            if greaterthan9 == 1:
-                greaterthan9 = 0
-                adjustcmc = 1
-                continue
+        scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
+        print scannumber
+        for item in scannumber:
+            if item.find("/en/"):
+    #            cardloc = scannumber[0][:-4].split("/")
+                cardloc = item[:-4].split("/")
+        print cardloc
 
-            #lands have no mana cost and are tagged with '*'
-            if cost[n] == "*":
-                continue
+        name2 = ''.join(e for e in name if e.isalnum())
+        localname = name2+'_'+set+'.jpg'
 
-            else:
+        #get the jpg file of the card scan -- ONLY if not already in Scans/
+        lookupScan = './Scans/'+localname
+    #    print "lookupScan = ",lookupScan
+
+        if lookupScan in storedScans:
+            print "Card art already been used, loading..."
+        else:
+            cardpic = 'curl -O http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
+            os.system(cardpic)
+            #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
+            rename = 'mv '+cardloc[3]+'jpg Scans/'+localname
+            os.system(rename)
+
+        img = Image.open('Scans/'+localname)
+
+        #check if im has Alpha band...
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+
+        #resize the gradient to the size of im...
+        alpha = gradient.resize(img.size)
+
+        #put alpha in the alpha band of im...
+        img.putalpha(alpha)
+
+        bkgd = Image.new("RGB", img.size, "black")
+        bkgd.paste(img, (0,0), mask=img)
+
+        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+
+        draw = ImageDraw.Draw(cut)
+        #create text outline
+        draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+        #enter text
+        draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+
+        cmc = Image.new('RGBA',(16*len(cost), 16))
+
+        lookupCMC = './Scans/'+name2+'_'+set+'_cmc.png'
+
+        if lookupCMC in storedCMCs:
+
+            print "Card CMC' already been used, loading..."
+            tap0 = Image.open(lookupCMC)
+
+            if tap0.mode != 'RGBA':
+                tap0 = tap0.convert('RGBA')
+
+            cmc.paste(tap0, (0,0), mask=tap0)
+
+            #still need to check cost adjustment...
+            for n in range(len(cost)-1):
                 if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
-                    finalcost = cost[n]+cost[n+1]
-                    greaterthan9 = 1
+                    adjustcmc = 1
+
+        else:
+
+            for n in range(len(cost)-1):
+
+                #reset the large mana cost markers
+                if greaterthan9 == 1:
+                    greaterthan9 = 0
+                    adjustcmc = 1
+                    continue
+
+                #lands have no mana cost and are tagged with '*'
+                if cost[n] == "*":
+                    continue
+
                 else:
-                    finalcost = cost[n]
+                    if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
+                        finalcost = cost[n]+cost[n+1]
+                        greaterthan9 = 1
+                    else:
+                        finalcost = cost[n]
 
-                symbol = 'Mana/Mana_'+finalcost+'.png'
+                    symbol = 'Mana/Mana_'+finalcost+'.png'
 
-                tap0 = Image.open(symbol)
-                if tap0.mode != 'RGBA':
-                    tap0 = tap0.convert('RGBA')
+                    tap0 = Image.open(symbol)
+                    if tap0.mode != 'RGBA':
+                        tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((16,16))
+                    tap = tap0.resize((16,16))
 
-                cmc.paste(tap, (15*n,0), mask=tap)
+                    cmc.paste(tap, (15*n,0), mask=tap)
 
-        cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
+            cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
 
-    #place the cropped picture of the current card
-    deck.paste(cut, (0,34*nstep))
-    
-    #adjust cmc size to reflex manacost greater than 9
-    if adjustcmc == 1:
-        deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
-        adjustcmc = 0
-    else:
-        deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
+        #place the cropped picture of the current card
+        deck.paste(cut, (0,34*nstep))
 
-#    os.system('rm -r '+name2+'.jpg')
-#    if cost[n] != "*":
-#        os.system('rm -r '+name2+'.png')
-#        os.system('rm -r '+name2+'_cmc.png')
+        #adjust cmc size to reflex manacost greater than 9
+        if adjustcmc == 1:
+            deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
+            adjustcmc = 0
+        else:
+            deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
 
-    nstep = nstep+1
-
-decklist.close()
-
+        nstep = nstep+1
+        
+            
 deck = deck.crop((0, 0, deckwidth-10, deckheight))
 
 #deck.save("deck.png")
