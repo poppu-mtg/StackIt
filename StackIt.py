@@ -353,7 +353,7 @@ if not isXML:
         #all card arts are found on magiccards.info
     #    cmcscan = cmctree.xpath('//a[img]/@href')
 
-        lookupScan = scraper.DownloadScan(name,set)
+        lookupScan = scraper.download_scan(name,set)
 
         img = Image.open(lookupScan)
 
@@ -519,7 +519,7 @@ else:
         set = doitAll[2+4*nAll]
         cost = doitAll[3+4*nAll]
 
-        lookupScan = scraper.DownloadScan(name, set)
+        lookupScan = scraper.download_scan(name, set)
 
         img = Image.open(lookupScan)
 
