@@ -13,7 +13,7 @@ The initial upload is the version of the script as of March 7, 2017: it allows g
   (1) final picture is generated as a .png file;  
   (2) reads the decklist from a file name given as a variable on the command line (rather than hard-coded in the script, giving user some flexibility);  
   (3) includes a title header based on the name of the decklist;  
-  (4) has the default option of Battle for Zendikar art for all basic lands (Magic: the Gathering decks).
+  (4) has the default option of Unhinged art for all basic lands (Magic: the Gathering decks).
   
 
 Already in development is:  
