@@ -395,11 +395,6 @@ if not isXML:
         else:
             deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
 
-    #    os.system('rm -r '+name2+'.jpg')
-    #    if cost[n] != "*":
-    #        os.system('rm -r '+name2+'.png')
-    #        os.system('rm -r '+name2+'_cmc.png')
-
         nstep = nstep+1
 
     decklist.close()

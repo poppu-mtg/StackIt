@@ -5,9 +5,7 @@ Python2 script generating a column-shaped TCG decklist based on cropped captions
 ## Requirements
 This script was written on a Mac OSX Sierra (10.12.3) and as such relies on a couple of specific items:  
   (1) Python 2.7
-  (2) PIL and lxml (install with `pip install -r requirements.txt`)
-  (3) the shell command 'curl' to lookup the html code of the webpages containing the information we are looking for (card scan, set, mana cost).
-  
+  (2) PIL, lxml, and requests (install with `pip install -r requirements.txt`)  
 
 ## Roadmap
 The initial upload is the version of the script as of March 7, 2017: it allows generating a visual decklist for Magic: the Gathering decks. The main features of this version are:  

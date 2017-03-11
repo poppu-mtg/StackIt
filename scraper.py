@@ -1,4 +1,4 @@
-import os
+import os, urllib
 import requests
 
 from lxml import html
@@ -23,9 +23,9 @@ def download_scan(name, set):
             cardloc = item[:-4].split("/")
     print(cardloc)
 
-    cardpic = 'curl -O http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
-    os.system(cardpic)
+    url = 'http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
     #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
+    urllib.urlretrieve(url, cardloc[3]+'jpg')
     os.rename(cardloc[3] + 'jpg', lookupScan)
 
     return lookupScan
