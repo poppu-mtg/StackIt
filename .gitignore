@@ -1,3 +1,4 @@
 Scans/
-scraper.pyc
+*.pyc
 CmcCache/
+settings.yml

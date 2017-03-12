@@ -16,7 +16,7 @@ import xml.etree.ElementTree
 from lxml import html
 import requests
 
-import scraper
+import scraper, config
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 adjustcmc = False
@@ -118,7 +118,7 @@ drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), f
 #check if we should include the sideboard
 isSideboard = 0
 if len(sys.argv) == 2:
-    doSideboard = False
+    doSideboard = config.settings['options']['DisplaySideboard']
 else:
     if str(sys.argv[2]) in ['sb', 'sideboard']:
         doSideboard = True
@@ -126,8 +126,10 @@ else:
         sideboard = Image.new("RGB", (280,34), "black")
         drawtitle = ImageDraw.Draw(sideboard)
         drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
-    else:
+    elif str(sys.argv[2]) in ['nosb']:
         doSideboard = False
+    else: 
+        doSideboard = config.settings['options']['DisplaySideboard']
 
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
@@ -135,7 +137,7 @@ decklist1 = open(str(sys.argv[1]), 'r')
 #determine if input decklist is in XML format
 isDeckXML = mmap.mmap(decklist1.fileno(), 0, access=mmap.ACCESS_READ)
 if isDeckXML.find('xml') != -1:
-    print 'Warning - input decklist is in XML format'
+    print('Warning - input decklist is in XML format')
     isXML = True
     
 #check for readable content
