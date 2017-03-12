@@ -370,9 +370,6 @@ else:
     sizeLastSB = 0
     
     for n in range(ncountMB):
-    
-        ncount_card = 0
-
         #necessary for appropriate treatment of the missing mana cost of lands
         isitland = 0
         isitspecland = 0
@@ -384,74 +381,13 @@ else:
         name = modonames[n]
         quantity = modoquant[n]
 
-        for landtype in basics:
-            if name.lower() == landtype:
-                isitland = 1
-
-#        print quantity,name,isitland
-    
-        if isitland != 1:
-
-            #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
-            name_sub = name.replace(",","")
-            name_sub = name_sub.replace("'"," ")
-            print name_sub
-
-            cmcsearch = name_sub.replace(" ","+")
-            scansearch = name_sub.replace(" s ","s ")
-            scansearch = scansearch.replace(" ","-")
-            scansearch = scansearch.lower()
-            print cmcsearch,scansearch
-
-            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
-
-            cmcpage = requests.get(cmcweb)
-            cmctree = html.fromstring(cmcpage.content)
-
-            scankey = "/card/" + scansearch + '/'
-
-            cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-            for item in cmcscan:
-                if scan_part1 != " ":
-                    continue
-                if item.find(scankey) == 0:
-                    print "found it:",item
-                    scan_part1 = item.split(scankey)[1]
-                ncount_card = ncount_card + 1
-            altscan = str(scan_part1.split('/"')[0]).lower()
-
-            set = altscan[:-1]
-
-            cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
-            print cmctext
-
-            finallist = []
-            for item in cmctext:
-                if item[-1] == "}":
-                    finallist.append(item)
-            print finallist
-
-            if cmctext[0].find("Land") != -1:
-                isitspecland = 1
-            else:
-                cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
-                altcmc = cmc_part1.split("}{")
-                altcmc = [specmana[x] for x in altcmc]
-                print name,altcmc
-
-            if isitspecland == 1:
-                cost = "*\n"
-            else:
-                cost = "".join(altcmc)+"\n"
-            print name,set,cost
-
-        else:
-
-            #all basic lands will be using Unhinged card art
-            set = "uh"
-            cost = "*\n"
-
-        print quantity,name,set,cost
+        card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
+        if card is None:
+            continue
+        name = card.name
+        set = card.set
+        cost = card.cost
+        quantity = card.quantity
         
         if cost == "*\n":
             doitLast.append(quantity)
@@ -490,74 +426,14 @@ else:
             name = modonamesSB[n]
             quantity = modoquantSB[n]
 
-            for landtype in basics:
-                if name.lower() == landtype:
-                    isitland = 1
+            card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
+            if card is None:
+                continue
+            name = card.name
+            set = card.set
+            cost = card.cost
+            quantity = card.quantity
 
-    #        print quantity,name,isitland
-
-            if isitland != 1:
-
-                #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
-                name_sub = name.replace(",","")
-                name_sub = name_sub.replace("'"," ")
-                print name_sub
-
-                cmcsearch = name_sub.replace(" ","+")
-                scansearch = name_sub.replace(" s ","s ")
-                scansearch = scansearch.replace(" ","-")
-                scansearch = scansearch.lower()
-                print cmcsearch,scansearch
-
-                cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
-
-                cmcpage = requests.get(cmcweb)
-                cmctree = html.fromstring(cmcpage.content)
-
-                scankey = "/card/" + scansearch + '/'
-
-                cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-                for item in cmcscan:
-                    if scan_part1 != " ":
-                        continue
-                    if item.find(scankey) == 0:
-                        print "found it:",item
-                        scan_part1 = item.split(scankey)[1]
-                    ncount_card = ncount_card + 1
-                altscan = str(scan_part1.split('/"')[0]).lower()
-
-                set = altscan[:-1]
-
-                cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
-                print cmctext
-
-                finallist = []
-                for item in cmctext:
-                    if item[-1] == "}":
-                        finallist.append(item)
-                print finallist
-
-                if cmctext[0].find("Land") != -1:
-                    isitspecland = 1
-                else:
-                    cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
-                    altcmc = cmc_part1.split("}{")
-                    altcmc = [specmana[x] for x in altcmc]
-                    print name,altcmc
-
-                if isitspecland == 1:
-                    cost = "*\n"
-                else:
-                    cost = "".join(altcmc)+"\n"
-                print name,set,cost
-
-            else:
-
-                #all basic lands will be using Unhinged card art
-                set = "uh"
-                cost = "*\n"
-
-            print quantity,name,set,cost
 
             if cost == "*\n":
                 doitLastSB.append(quantity)
