@@ -118,7 +118,7 @@ drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), f
 #check if we should include the sideboard
 isSideboard = 0
 if len(sys.argv) == 2:
-    doSideboard = config.settings['options']['DisplaySideboard']
+    doSideboard = config.Get('options', 'display_sideboard')
 else:
     if str(sys.argv[2]) in ['sb', 'sideboard']:
         doSideboard = True
@@ -129,7 +129,7 @@ else:
     elif str(sys.argv[2]) in ['nosb']:
         doSideboard = False
     else: 
-        doSideboard = config.settings['options']['DisplaySideboard']
+        doSideboard = config.Get('options', 'display_sideboard')
 
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
@@ -229,7 +229,7 @@ if not isXML:
         isitspecland = 0
 
         #reset the new parser
-        set = ' '
+        set = None
         scan_part1 = ' '
 
         if lines[0] == '#':
@@ -341,6 +341,8 @@ if not isXML:
             quantity = int(lines.split(" ",1)[0])
             name = lines.split(" ",1)[1].strip()
 
+            set = config.Get('cards', name)
+
             if quantity == 0:
                 continue
 
@@ -414,7 +416,8 @@ if not isXML:
             else:
 
                 #all basic lands will be using Unhinged card art
-                set = "uh"
+                if set is None:
+                    set = "uh"
                 cost = "*\n"
 
         if isSideboard == 1:
@@ -543,7 +546,7 @@ else:
         isitspecland = 0
 
         #reset the new parser
-        set = ' '
+        set = None
         scan_part1 = ' '
         
         name = modonames[n]

@@ -6,13 +6,13 @@ if not os.path.exists('settings.yml'):
     with open('settings.yml', 'w') as f:
         f.write("""
 cards:
-  Plains: uh
-  Island: uh
-  Swamp: uh
-  Mountain: uh
-  Forest: uh
+  plains: uh
+  island: uh
+  swamp: uh
+  mountain: uh
+  forest: uh
 options:
-  DisplaySideboard: yes
+  display_sideboard: yes
 """)
 
 with open('settings.yml') as f:
@@ -20,3 +20,9 @@ with open('settings.yml') as f:
 
 print("==Settings==")
 print(yaml.dump(settings))
+
+def Get(group, name):
+    try:
+        return settings[group][name]
+    except KeyError:
+        return None
