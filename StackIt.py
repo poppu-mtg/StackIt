@@ -18,11 +18,15 @@ import requests
 
 import scraper
 
+#ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
+adjustcmc = False
+check9 = '0123456'
+
 def GenerateCMC(name, set):
     global adjustcmc
-    global greaterthan9
     name2 = ''.join(e for e in name if e.isalnum())
-    lookupCMC = './Scans/'+name2+'_'+set+'_cmc.png'
+    diskcost = cost.strip().replace('*', '_')
+    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         print("Card CMC' already been used, loading...")
         tap0 = Image.open(lookupCMC)
@@ -32,13 +36,14 @@ def GenerateCMC(name, set):
         #still need to check cost adjustment...
         for n in range(len(cost)-1):
             if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
-                adjustcmc = 1
+                adjustcmc = True
     else:
+        greaterthan9 = False
         for n in range(len(cost)-1):
             #reset the large mana cost markers
             if greaterthan9:
                 greaterthan9 = False
-                adjustcmc = 1
+                adjustcmc = True
                 continue
             #lands have no mana cost and are tagged with '*'
             if cost[n] == "*":
@@ -56,16 +61,16 @@ def GenerateCMC(name, set):
                     tap0 = tap0.convert('RGBA')
 
                 tap = tap0.resize((16,16))
-
                 cmc.paste(tap, (15*n,0), mask=tap)
-
-        cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
+        cmc.save(lookupCMC)
 
 ncount = 0
 nstep = 1
 
 if not os.path.exists('./Scans'):
     os.mkdir('./Scans')
+if not os.path.exists('./CmcCache'):
+    os.mkdir('./CmcCache')
 
 #some position initialization
 xtop = 8
@@ -83,11 +88,6 @@ basics = ["plains","island","swamp","mountain","forest"]
 
 #create a dictionary for non-basic mana:
 specmana = {'0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10', '11': '11', '12': '12', '13': '13', '14': '14', '15': '15', '16': '16', 'X': 'X', 'C': 'C', 'W': 'W', 'U': 'U', 'B': 'B', 'R': 'R', 'G': 'G', 'PW': 'P', 'PU': 'Q', 'PB': 'S', 'PR': 'T', 'PG': 'V', '2W': 'Y', '2U': 'Z', '2B': '@', '2R': 'A', '2G': 'D', 'WU': 'E', 'UB': 'F', 'BR': 'H', 'RG': 'I', 'GW': 'J', 'WB': 'K', 'UR': 'L', 'BG': 'M', 'RW': 'N', 'GU': 'O'}
-
-#ensure that mana costs greater than 9 (Kozilek, Emrakul...) are taken care of appropriately
-greaterthan9 = False
-adjustcmc = 0
-check9 = '0123456'
 
 #check the input format
 isXML = False
@@ -395,9 +395,9 @@ if not isXML:
         deck.paste(cut, (0,34*nstep))
 
         #adjust cmc size to reflex manacost greater than 9
-        if adjustcmc == 1:
+        if adjustcmc:
             deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
-            adjustcmc = 0
+            adjustcmc = False
         else:
             deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
 
@@ -556,9 +556,9 @@ else:
         deck.paste(cut, (0,34*nstep))
 
         #adjust cmc size to reflex manacost greater than 9
-        if adjustcmc == 1:
+        if adjustcmc:
             deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
-            adjustcmc = 0
+            adjustcmc = False
         else:
             deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
 
