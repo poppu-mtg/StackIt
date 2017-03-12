@@ -62,6 +62,7 @@ def GenerateCMC(name, set):
         cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
 
 ncount = 0
+ncountMB = 0
 ncountSB = 0
 nstep = 1
 
