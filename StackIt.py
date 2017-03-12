@@ -62,6 +62,7 @@ def GenerateCMC(name, set):
         cmc.save('Scans/'+name2+'_'+set+'_cmc.png')
 
 ncount = 0
+ncountSB = 0
 nstep = 1
 
 if not os.path.exists('./Scans'):
@@ -114,11 +115,19 @@ title = Image.new("RGB", (280,34), "black")
 drawtitle = ImageDraw.Draw(title)
 drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=fnt_title)
 
-#create a Sideboard partition
-sideboard = Image.new("RGB", (280,34), "black")
-drawtitle = ImageDraw.Draw(sideboard)
-drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
-
+#check if we should include the sideboard
+isSideboard = 0
+if len(sys.argv) == 2:
+    doSideboard = False
+else:
+    if str(sys.argv[2]) in ['sb', 'sideboard']:
+        doSideboard = True
+        #create a Sideboard partition
+        sideboard = Image.new("RGB", (280,34), "black")
+        drawtitle = ImageDraw.Draw(sideboard)
+        drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
+    else:
+        doSideboard = False
 
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
@@ -135,10 +144,17 @@ if isXML:
     info = xml.etree.ElementTree.parse(str(sys.argv[1])).getroot()
 
     modoformat = {}
+    modoformatSB = {}
 
     for atype in info.findall('Cards'):
         if atype.get('Sideboard') == "true":
-            continue
+            if not doSideboard:
+                continue
+            else:
+                if atype.get('Name') in modoformatSB:
+                    modoformatSB[atype.get('Name')] += int(atype.get('Quantity'))
+                else:
+                    modoformatSB[atype.get('Name')] = int(atype.get('Quantity'))
         else:
             if atype.get('Name') in modoformat:
                 modoformat[atype.get('Name')] += int(atype.get('Quantity'))
@@ -147,14 +163,27 @@ if isXML:
 
     modonames = list(modoformat.keys())
     modoquant = [modoformat[x] for x in modonames]
-    ncount = len(modonames)
-    print ncount, modonames, modoquant
+    ncountMB = len(modonames)
+    modonamesSB = list(modoformatSB.keys())
+    modoquantSB = [modoformatSB[x] for x in modonamesSB]
+    ncountSB = len(modonamesSB)
+    print ncountMB, modonames, modoquant
+    print ncountSB, modonamesSB, modoquantSB
+    ncount=ncountMB+ncountSB+1 #1 extra space for the sideboard marker
     
 else:
 
     for lines1 in decklist1:
     
         if lines1[0] == '#':
+            continue
+
+        if lines1 in ['\n', '\r\n']:
+            isSideboard = 1
+            if not doSideboard:
+                continue
+
+        if (isSideboard == 1) and (not doSideboard):
             continue
 
         ncount = ncount +1
@@ -165,6 +194,9 @@ decklist1.close()
 deckheight = 34*(ncount+1)
 deckwidth = 280
 
+#reset the sideboard marker
+isSideboard = 0
+
 deck = Image.new("RGB", (deckwidth, deckheight), "white")
 
 deck.paste(title, (0,0))
@@ -173,6 +205,17 @@ deck.paste(title, (0,0))
 if not isXML:
 
     #parse an ASCII decklist
+    doitFirst = []
+    doitLast = []
+    doSideMark = []
+    doitFirstSB = []
+    doitLastSB = []
+    sizeFirst = 0
+    sizeLast = 0
+    sizeMark = 0
+    sizeFirstSB = 0
+    sizeLastSB = 0
+    
     decklist = open(str(sys.argv[1]), 'r')
 
     for lines in decklist:
@@ -190,12 +233,25 @@ if not isXML:
         if lines[0] == '#':
             continue
         
-        if lines[0] == '\n':
-            # We're at the Sideboard now.
-            deck.paste(sideboard, (0,34*nstep))
-            nstep = nstep + 1
-            continue
+        if lines in ['\n', '\r\n']:
+            isSideboard = 1
+            if not doSideboard:
+                continue
+            else:
+                # We're at the Sideboard now.
+                print '-- Sideboard --'
+#                deck.paste(sideboard, (0,34*nstep))
+                doSideMark.append('sideboard')
+                doSideMark.append('sideboard')
+                doSideMark.append('sideboard')
+                doSideMark.append('sideboard')
+                sizeMark = sizeMark + 1
+#                nstep = nstep + 1
+                continue
 
+        if (isSideboard == 1) and (not doSideboard):
+            continue
+        
         #this step checks whether a specific art is requested by the user - provided via the set name
 
         if lines.find('/') != -1:
@@ -356,6 +412,60 @@ if not isXML:
                 set = "uh"
                 cost = "*\n"
 
+        if isSideboard == 1:
+            if not doSideboard:
+                continue
+            else:
+                if cost == "*\n":
+                    doitLastSB.append(quantity)
+                    doitLastSB.append(name)
+                    doitLastSB.append(set)
+                    doitLastSB.append(cost)
+                    sizeLastSB = sizeLastSB + 1
+                else:
+                    doitFirstSB.append(quantity)
+                    doitFirstSB.append(name)
+                    doitFirstSB.append(set)
+                    doitFirstSB.append(cost)
+                    sizeFirstSB = sizeFirstSB + 1
+        else:    
+            if cost == "*\n":
+                doitLast.append(quantity)
+                doitLast.append(name)
+                doitLast.append(set)
+                doitLast.append(cost)
+                sizeLast = sizeLast + 1
+            else:
+                doitFirst.append(quantity)
+                doitFirst.append(name)
+                doitFirst.append(set)
+                doitFirst.append(cost)
+                sizeFirst = sizeFirst + 1
+
+    doitAll = doitFirst+doitLast
+    sizeAll = sizeFirst+sizeLast
+    if doSideboard:
+        doitAll = doitAll+doSideMark
+        sizeAll = sizeAll+sizeMark
+        if sizeFirstSB != 0:
+            doitAll = doitAll+doitFirstSB
+            sizeAll = sizeAll+sizeFirstSB
+        if sizeLastSB != 0:
+            doitAll = doitAll+doitLastSB
+            sizeAll = sizeAll+sizeLastSB
+    print "final list to be stacked: ",doitAll,sizeAll
+            
+    for nAll in range(sizeAll):
+        quantity = doitAll[0+4*nAll]
+        name = doitAll[1+4*nAll]
+        set = doitAll[2+4*nAll]
+        cost = doitAll[3+4*nAll]
+
+        if quantity == 'sideboard':
+            deck.paste(sideboard, (0,34*nstep))
+            nstep = nstep + 1
+            continue
+
         #all card arts are found on magiccards.info
     #    cmcscan = cmctree.xpath('//a[img]/@href')
 
@@ -410,10 +520,16 @@ else:
     #parse the XML decklist
     doitFirst = []
     doitLast = []
+    doSideMark = []
+    doitFirstSB = []
+    doitLastSB = []
     sizeFirst = 0
     sizeLast = 0
+    sizeMark = 0
+    sizeFirstSB = 0
+    sizeLastSB = 0
     
-    for n in range(ncount):
+    for n in range(ncountMB):
     
         ncount_card = 0
 
@@ -510,15 +626,137 @@ else:
             doitFirst.append(cost)
             sizeFirst = sizeFirst + 1
 
+    if ncountSB != 0:
+        
+        print '-- Sideboard --'
+        doSideMark.append('sideboard')
+        doSideMark.append('sideboard')
+        doSideMark.append('sideboard')
+        doSideMark.append('sideboard')
+        sizeMark = sizeMark + 1
+        
+        for n in range(ncountSB):
+
+            ncount_card = 0
+
+            #necessary for appropriate treatment of the missing mana cost of lands
+            isitland = 0
+            isitspecland = 0
+
+            #reset the new parser
+            set = ' '
+            scan_part1 = ' '
+
+            name = modonamesSB[n]
+            quantity = modoquantSB[n]
+
+            for landtype in basics:
+                if name.lower() == landtype:
+                    isitland = 1
+
+    #        print quantity,name,isitland
+
+            if isitland != 1:
+
+                #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
+                name_sub = name.replace(",","")
+                name_sub = name_sub.replace("'"," ")
+                print name_sub
+
+                cmcsearch = name_sub.replace(" ","+")
+                scansearch = name_sub.replace(" s ","s ")
+                scansearch = scansearch.replace(" ","-")
+                scansearch = scansearch.lower()
+                print cmcsearch,scansearch
+
+                cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
+
+                cmcpage = requests.get(cmcweb)
+                cmctree = html.fromstring(cmcpage.content)
+
+                scankey = "/card/" + scansearch + '/'
+
+                cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
+                for item in cmcscan:
+                    if scan_part1 != " ":
+                        continue
+                    if item.find(scankey) == 0:
+                        print "found it:",item
+                        scan_part1 = item.split(scankey)[1]
+                    ncount_card = ncount_card + 1
+                altscan = str(scan_part1.split('/"')[0]).lower()
+
+                set = altscan[:-1]
+
+                cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
+                print cmctext
+
+                finallist = []
+                for item in cmctext:
+                    if item[-1] == "}":
+                        finallist.append(item)
+                print finallist
+
+                if cmctext[0].find("Land") != -1:
+                    isitspecland = 1
+                else:
+                    cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
+                    altcmc = cmc_part1.split("}{")
+                    altcmc = [specmana[x] for x in altcmc]
+                    print name,altcmc
+
+                if isitspecland == 1:
+                    cost = "*\n"
+                else:
+                    cost = "".join(altcmc)+"\n"
+                print name,set,cost
+
+            else:
+
+                #all basic lands will be using Unhinged card art
+                set = "uh"
+                cost = "*\n"
+
+            print quantity,name,set,cost
+
+            if cost == "*\n":
+                doitLastSB.append(quantity)
+                doitLastSB.append(name)
+                doitLastSB.append(set)
+                doitLastSB.append(cost)
+                sizeLastSB = sizeLastSB + 1
+            else:
+                doitFirstSB.append(quantity)
+                doitFirstSB.append(name)
+                doitFirstSB.append(set)
+                doitFirstSB.append(cost)
+                sizeFirstSB = sizeFirstSB + 1
+
     doitAll = doitFirst+doitLast
     sizeAll = sizeFirst+sizeLast
-    print doitAll,sizeAll
+    if sizeMark != 0:
+        doitAll = doitAll+doSideMark
+        sizeAll = sizeAll+sizeMark
+        if sizeFirstSB != 0:
+            doitAll = doitAll+doitFirstSB
+            sizeAll = sizeAll+sizeFirstSB
+        if sizeLastSB != 0:
+            doitAll = doitAll+doitLastSB
+            sizeAll = sizeAll+sizeLastSB
+    print "final list to be stacked: ",doitAll,sizeAll
             
     for nAll in range(sizeAll):
         quantity = doitAll[0+4*nAll]
         name = doitAll[1+4*nAll]
         set = doitAll[2+4*nAll]
         cost = doitAll[3+4*nAll]
+
+        print "stacking: ",name
+        
+        if quantity == 'sideboard':
+            deck.paste(sideboard, (0,34*nstep))
+            nstep = nstep + 1
+            continue
 
         lookupScan = scraper.download_scan(name, set)
 
