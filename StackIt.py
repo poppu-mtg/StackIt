@@ -122,14 +122,16 @@ if len(sys.argv) == 2:
 else:
     if str(sys.argv[2]) in ['sb', 'sideboard']:
         doSideboard = True
-        #create a Sideboard partition
-        sideboard = Image.new("RGB", (280,34), "black")
-        drawtitle = ImageDraw.Draw(sideboard)
-        drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
     elif str(sys.argv[2]) in ['nosb']:
         doSideboard = False
     else: 
         doSideboard = config.Get('options', 'display_sideboard')
+
+if doSideboard:
+    #create a Sideboard partition
+    sideboard = Image.new("RGB", (280,34), "black")
+    drawtitle = ImageDraw.Draw(sideboard)
+    drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
 
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
