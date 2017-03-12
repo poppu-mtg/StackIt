@@ -28,7 +28,6 @@ def GenerateCMC(name, set):
     diskcost = cost.strip().replace('*', '_')
     lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
-        print("Card CMC' already been used, loading...")
         tap0 = Image.open(lookupCMC)
         if tap0.mode != 'RGBA':
             tap0 = tap0.convert('RGBA')
@@ -394,6 +393,9 @@ if not isXML:
 
                 if cmctext[0].find("Land") != -1:
                     isitspecland = 1
+                elif not '}' in cmctext[0]:
+                    # Lotus Bloom, Evermind, and other costless cards.
+                    altcmc = "**"
                 else:
     #                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
                     cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
