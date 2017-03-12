@@ -521,5 +521,7 @@ else:
             
 deck = deck.crop((0, 0, deckwidth-10, deckheight))
 
-#deck.save("deck.png")
 deck.save(str(sys.argv[1])[0:-4]+".png")
+altpath = config.Get('options', 'output_path')
+if altpath is not None:
+    deck.save(altpath)

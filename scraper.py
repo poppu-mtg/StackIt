@@ -87,11 +87,11 @@ def get_card_info(line):
         scankey = "/card/" + scansearch + '/'
 
         cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-#            print cmcscan
+        # print cmcscan
         for item in cmcscan:
-#                print item,ncount_card
+            # print item,ncount_card
             if scan_part1 != " ":
-                return None
+                continue
             if item.find(scankey) == 0:
                 print "found it:",item
                 scan_part1 = item.split(scankey)[1]
