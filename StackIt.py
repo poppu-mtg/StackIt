@@ -25,7 +25,8 @@ check9 = '0123456'
 def GenerateCMC(name, set):
     global adjustcmc
     diskcost = cost.strip().replace('*', '_')
-    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
+#    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
+    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost.replace('/','-')))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
         if tap0.mode != 'RGBA':
@@ -46,6 +47,15 @@ def GenerateCMC(name, set):
             #lands have no mana cost and are tagged with '*'
             if cost[n] == "*":
                 continue
+            #add correct treatment of separation for split cards
+            elif cost[n] == '/':
+                symbol = 'Mana/Mana_spn.png'
+                tap0 = Image.open(symbol)
+                if tap0.mode != 'RGBA':
+                    tap0 = tap0.convert('RGBA')
+
+                tap = tap0.resize((16,16))
+                cmc.paste(tap, (15*n,0), mask=tap)
             else:
                 if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
                     finalcost = cost[n]+cost[n+1]
@@ -60,7 +70,7 @@ def GenerateCMC(name, set):
 
                 tap = tap0.resize((16,16))
                 cmc.paste(tap, (15*n,0), mask=tap)
-        cmc.save(lookupCMC)
+        cmc.save((lookupCMC.replace('/','-')).replace('che-','che/'))
 
 ncount = 0
 ncountMB = 0
@@ -149,19 +159,19 @@ if isXML:
                 continue
             else:
                 if atype.get('Name') in modoformatSB:
-                    modoformatSB[atype.get('Name')] += int(atype.get('Quantity'))
+                    modoformatSB[atype.get('Name').replace(' / ',' // ')] += int(atype.get('Quantity'))
                 else:
-                    modoformatSB[atype.get('Name')] = int(atype.get('Quantity'))
+                    modoformatSB[atype.get('Name').replace(' / ',' // ')] = int(atype.get('Quantity'))
         else:
             if atype.get('Name') in modoformat:
                 modoformat[atype.get('Name')] += int(atype.get('Quantity'))
             else:
                 modoformat[atype.get('Name')] = int(atype.get('Quantity'))
 
-    modonames = list(modoformat.keys())
+    modonames = [x.replace(' / ',' // ') for x in list(modoformat.keys())]
     modoquant = [modoformat[x] for x in modonames]
     ncountMB = len(modonames)
-    modonamesSB = list(modoformatSB.keys())
+    modonamesSB = [x.replace(' / ',' // ') for x in list(modoformatSB.keys())]
     modoquantSB = [modoformatSB[x] for x in modonamesSB]
     ncountSB = len(modonamesSB)
     print ncountMB, modonames, modoquant
@@ -309,10 +319,18 @@ if not isXML:
         #all card arts are found on magiccards.info
     #    cmcscan = cmctree.xpath('//a[img]/@href')
 
-        lookupScan = scraper.download_scan(name,set)
+        if name.find(" // ") != -1:
+            namesplit = name.replace(" // ","/")
+            lookupScan = scraper.download_scan(namesplit,set)
+        else:
+            lookupScan = scraper.download_scan(name,set)
 
+#        print name, lookupScan
+            
         img = Image.open(lookupScan)
-
+        if name.find(" // ") != -1:
+            img = img.rotate(-90)
+        
         #check if im has Alpha band...
         if img.mode != 'RGBA':
             img = img.convert('RGBA')
@@ -474,10 +492,19 @@ else:
             nstep = nstep + 1
             continue
 
-        lookupScan = scraper.download_scan(name, set)
+#        lookupScan = scraper.download_scan(name, set)
+        if name.find(" // ") != -1:
+            namesplit = name.replace(" // ","/")
+            lookupScan = scraper.download_scan(namesplit,set)
+        else:
+            lookupScan = scraper.download_scan(name,set)
 
+#        print name, lookupScan
+            
         img = Image.open(lookupScan)
-
+        if name.find(" // ") != -1:
+            img = img.rotate(-90)
+        
         #check if im has Alpha band...
         if img.mode != 'RGBA':
             img = img.convert('RGBA')

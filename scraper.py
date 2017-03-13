@@ -16,6 +16,9 @@ def download_scan(name, expansion):
     scanpage = requests.get(scanweb)
     scantree = html.fromstring(scanpage.content)
 
+    if name.find('/') != -1:
+        name = name.split('/')[0]+' ('+name+')'
+
     scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
     print(scannumber)
     cardloc = None
@@ -40,15 +43,23 @@ def get_card_info(line):
     ncount_card = 0
     isitland = False
     scan_part1 = ' '
+    #flag for split cards
+    splitcost = False
+    n_cost = 0
+    altcmc_list = []
 
     quantity = int(line.split(" ",1)[0])
 
-    if line.find('/') != -1:
+    if line.find(' / ') != -1:
         data = line.split(" / ")
-
-        #split the info at the first blank space
-        name = data[0].split(" ",1)[1]
-        expansion = data[1].split("\n")[0].lower()
+        #for non-XML files, we need to check if this is a split card
+        if len(data) > 2:
+            name = data[0].split(" ",1)[1]+' // '+data[1]
+            expansion = data[2].split("\n")[0].lower()
+        else:
+            #split the info at the first blank space
+            name = data[0].split(" ",1)[1]
+            expansion = data[1].split("\n")[0].lower()
     else:
 
         #split the info at the first blank space
@@ -72,7 +83,11 @@ def get_card_info(line):
 
         cmcsearch = name_sub.replace(" ","+")
         scansearch = name_sub.replace(" s ","s ")
-        scansearch = scansearch.replace(" ","-")
+#        scansearch = scansearch.replace(" ","-")
+        if name_sub.find(' // ') != -1:
+            scansearch = scansearch.replace(" // ",'-')
+        else:
+            scansearch = scansearch.replace(" ","-")
         scansearch = scansearch.lower()
         print cmcsearch,scansearch
 
@@ -116,12 +131,25 @@ def get_card_info(line):
             altcmc = '**'
         else:
 #                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
-            cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
-            altcmc = cmc_part1.split("}{")
-            altcmc = [specmana[x] for x in altcmc]
-            print name,altcmc
+            if finallist[ncount_card-1].find(' // ') != -1:
+                splitcost = True
+                for item in finallist[0].split(' //'):
+                    altcmc_list.append(item.split(" {")[1][:-1].split("}{"))
+                    print name,altcmc_list[n_cost]
+                    n_cost += 1
+            else:
+                cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
+                altcmc = cmc_part1.split("}{")
+                altcmc = [specmana[x] for x in altcmc]
+                print name,altcmc
 
-        cost = "".join(altcmc)+"\n"
+        cost = ''
+        if splitcost:
+            for n in range(n_cost):
+                cost += "".join(altcmc_list[n])+'/'
+            cost = cost[:-1]+"\n"
+        else:
+            cost = "".join(altcmc)+"\n"
         print name,expansion,cost
 
     else:
