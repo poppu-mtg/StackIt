@@ -46,4 +46,4 @@ The separation ' / ' is necessary in the current Beta version to request a speci
 To test the Beta version, the decklist StressTest1.dec is provided.
 
 ## Sample Output
-![Sample Output](StressTest1.png)
+![Sample Output](testdecks/StressTest1.png)

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deck xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NetDeckID>0</NetDeckID>
+  <PreconstructedDeckID>0</PreconstructedDeckID>
+  <Cards CatID="48974" Quantity="3" Sideboard="false" Name="Gifts Ungiven" />
+  <Cards CatID="19569" Quantity="4" Sideboard="false" Name="Merchant Scroll" />
+  <Cards CatID="37468" Quantity="4" Sideboard="false" Name="Pyretic Ritual" />
+  <Cards CatID="48986" Quantity="4" Sideboard="false" Name="Desperate Ritual" />
+  <Cards CatID="29653" Quantity="4" Sideboard="false" Name="Manamorphose" />
+  <Cards CatID="62653" Quantity="4" Sideboard="false" Name="Baral, Chief of Compliance" />
+  <Cards CatID="46363" Quantity="4" Sideboard="false" Name="Goblin Electromancer" />
+  <Cards CatID="20956" Quantity="4" Sideboard="false" Name="Serum Visions" />
+  <Cards CatID="22889" Quantity="4" Sideboard="false" Name="Sleight of Hand" />
+  <Cards CatID="23174" Quantity="1" Sideboard="false" Name="Remand" />
+  <Cards CatID="61851" Quantity="3" Sideboard="false" Name="Spirebluff Canal" />
+  <Cards CatID="46805" Quantity="3" Sideboard="false" Name="Steam Vents" />
+  <Cards CatID="54196" Quantity="1" Sideboard="false" Name="Polluted Delta" />
+  <Cards CatID="19245" Quantity="3" Sideboard="false" Name="Island" />
+  <Cards CatID="57674" Quantity="4" Sideboard="false" Name="Shivan Reef" />
+  <Cards CatID="25535" Quantity="1" Sideboard="false" Name="Empty the Warrens" />
+  <Cards CatID="42712" Quantity="3" Sideboard="false" Name="Past in Flames" />
+  <Cards CatID="54200" Quantity="3" Sideboard="false" Name="Wooded Foothills" />
+  <Cards CatID="18983" Quantity="1" Sideboard="false" Name="Mountain" />
+  <Cards CatID="48930" Quantity="1" Sideboard="false" Name="Echoing Truth" />
+  <Cards CatID="25797" Quantity="1" Sideboard="false" Name="Grapeshot" />
+  <Cards CatID="50578" Quantity="2" Sideboard="true" Name="Anger of the Gods" />
+  <Cards CatID="25535" Quantity="1" Sideboard="true" Name="Empty the Warrens" />
+  <Cards CatID="48930" Quantity="1" Sideboard="true" Name="Echoing Truth" />
+  <Cards CatID="46733" Quantity="1" Sideboard="true" Name="Cyclonic Rift" />
+  <Cards CatID="35543" Quantity="1" Sideboard="true" Name="Dispel" />
+  <Cards CatID="57018" Quantity="1" Sideboard="true" Name="Hurkyl's Recall" />
+  <Cards CatID="34448" Quantity="1" Sideboard="true" Name="Into the Roil" />
+  <Cards CatID="32859" Quantity="4" Sideboard="true" Name="Lightning Bolt" />
+  <Cards CatID="34802" Quantity="2" Sideboard="true" Name="Mindbreak Trap" />
+  <Cards CatID="27162" Quantity="1" Sideboard="true" Name="Shatterstorm" />
+</Deck>
