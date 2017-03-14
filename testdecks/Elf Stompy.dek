@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deck xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NetDeckID>0</NetDeckID>
+  <PreconstructedDeckID>0</PreconstructedDeckID>
+  <Cards CatID="45364" Quantity="3" Sideboard="false" Name="Arbor Elf" />
+  <Cards CatID="27697" Quantity="4" Sideboard="false" Name="Llanowar Elves" />
+  <Cards CatID="51538" Quantity="4" Sideboard="false" Name="Elvish Mystic" />
+  <Cards CatID="35795" Quantity="3" Sideboard="false" Name="Joraga Warcaller" />
+  <Cards CatID="58074" Quantity="4" Sideboard="false" Name="Dwynen's Elite" />
+  <Cards CatID="45260" Quantity="3" Sideboard="false" Name="Elvish Visionary" />
+  <Cards CatID="45326" Quantity="3" Sideboard="false" Name="Elvish Archdruid" />
+  <Cards CatID="31435" Quantity="3" Sideboard="false" Name="Elvish Champion" />
+  <Cards CatID="28373" Quantity="2" Sideboard="false" Name="Imperious Perfect" />
+  <Cards CatID="28968" Quantity="4" Sideboard="false" Name="Bramblewood Paragon" />
+  <Cards CatID="39343" Quantity="4" Sideboard="false" Name="Lead the Stampede" />
+  <Cards CatID="50200" Quantity="4" Sideboard="false" Name="Nylea's Presence" />
+  <Cards CatID="21327" Quantity="7" Sideboard="false" Name="Forest" />
+  <Cards CatID="23524" Quantity="3" Sideboard="false" Name="Forest" />
+  <Cards CatID="23526" Quantity="3" Sideboard="false" Name="Forest" />
+  <Cards CatID="23542" Quantity="3" Sideboard="false" Name="Forest" />
+  <Cards CatID="28577" Quantity="2" Sideboard="false" Name="Forest" />
+  <Cards CatID="32701" Quantity="1" Sideboard="false" Name="Elvish Visionary" />
+  <Cards CatID="29200" Quantity="2" Sideboard="true" Name="Chameleon Colossus" />
+  <Cards CatID="48304" Quantity="2" Sideboard="true" Name="Skylasher" />
+  <Cards CatID="26680" Quantity="4" Sideboard="true" Name="Wrap in Vigor" />
+  <Cards CatID="50386" Quantity="2" Sideboard="true" Name="Mistcutter Hydra" />
+  <Cards CatID="10033" Quantity="2" Sideboard="true" Name="Choke" />
+  <Cards CatID="53606" Quantity="3" Sideboard="true" Name="Reclamation Sage" />
+</Deck>

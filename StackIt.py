@@ -24,9 +24,9 @@ check9 = '0123456'
 
 def GenerateCMC(name, set):
     global adjustcmc
-    diskcost = cost.strip().replace('*', '_')
+    diskcost = cost.strip().replace('*', '_').replace('/','-')
 #    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
-    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost.replace('/','-')))
+    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
         if tap0.mode != 'RGBA':
@@ -70,7 +70,7 @@ def GenerateCMC(name, set):
 
                 tap = tap0.resize((16,16))
                 cmc.paste(tap, (15*n,0), mask=tap)
-        cmc.save((lookupCMC.replace('/','-')).replace('che-','che/'))
+        cmc.save((lookupCMC).replace('che-','che/'))
 
 ncount = 0
 ncountMB = 0
