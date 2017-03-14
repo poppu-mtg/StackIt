@@ -40,6 +40,11 @@ def download_scan(name, expansion):
 
 
 def get_card_info(line):
+    
+    # Tappedout puts tabs instead of spaces.
+    # Easiest solution is to just sub them for spaces.
+    line = line.replace('\t', ' ')
+    
     ncount_card = 0
     isitland = False
     scan_part1 = ' '
