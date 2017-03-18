@@ -2,6 +2,9 @@ import os, urllib
 import requests
 import config
 
+#needed to remove the accent in 'Pokemon'
+import unicodedata
+
 from lxml import html
 from globals import Card, specmana
 
@@ -38,7 +41,24 @@ def download_scan(name, expansion):
 
     return lookupScan
 
+def download_scanPKMN(name, expansion, expID):
+    name = unicodedata.normalize('NFD', unicode(name[:-1], 'ISO-8859-1')).encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
+    displayname = name
+    name = name.replace(' ','-')
+    name = ''.join(e for e in name if e != "'")
 
+    localname = 'PKMN-'+name+'-'+expansion+'-'+expID+'.jpg'
+    lookupScan = os.path.join('.','Scans', localname)
+
+    if os.path.exists(lookupScan):
+        return lookupScan,displayname
+    
+    pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/'+name+'-'+expansion+'-'+expID+'.jpg'
+    urllib.urlretrieve(pokeurl, localname)
+    os.rename(localname, lookupScan)
+                
+    return lookupScan,displayname
+    
 def get_card_info(line):
     
     # Tappedout puts tabs instead of spaces.
