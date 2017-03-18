@@ -85,16 +85,28 @@ if not os.path.exists('./CmcCache'):
 #some position initialization
 xtop = 8
 xbot = 304
-
 ytop = 11.5
 ybot = 45.25
+
+xtopPKMN = 8
+xbotPKMN = 237
+ytopPKMN = 11.5
+ybotPKMN = 45.25
 
 #load the MTG text fonts
 fnt = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 14)
 fnt_title = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 18)
 
+#load the PKMN text fonts
+pokefnt = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 10)
+
+pokefnt_title = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
+
+
 #check the input format
 isXML = False
+isPokemon = False
+isMTG = True #default setting is Magic: the Gathering decklist
 
 # create a horizontal gradient...
 gradient = Image.new('L', (255,1))
@@ -113,11 +125,6 @@ for x in range(64):
 for x in range(64):
     gradient.putpixel((190+x,0),254)
 
-#create a header with the deck's name
-title = Image.new("RGB", (280,34), "black")
-drawtitle = ImageDraw.Draw(title)
-drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=fnt_title)
-
 #check if we should include the sideboard
 isSideboard = 0
 if len(sys.argv) == 2:
@@ -129,12 +136,6 @@ else:
         doSideboard = False
     else: 
         doSideboard = config.Get('options', 'display_sideboard')
-
-if doSideboard:
-    #create a Sideboard partition
-    sideboard = Image.new("RGB", (280,34), "black")
-    drawtitle = ImageDraw.Draw(sideboard)
-    drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
 
 #open user input decklist
 decklist1 = open(str(sys.argv[1]), 'r')
@@ -182,13 +183,20 @@ else:
 
     for lines1 in decklist1:
     
-        if lines1[0] == '#':
+#        if lines1[0] == '#':
+        if lines1[0] in ['#', '*']:
+            if lines1.lower().find('* pok') != -1:
+                print 'Decklist is for Pokemon TCGO ...'
+                isPokemon = True
+                isMTG = False
+                isSideboard = 0
             continue
 
         if lines1 in ['\n', '\r\n']:
-            isSideboard = 1
-            if not doSideboard:
-                continue
+            if isMTG:
+                isSideboard = 1
+                if not doSideboard:
+                    continue
 
         if (isSideboard == 1) and (not doSideboard):
             continue
@@ -197,10 +205,30 @@ else:
 
 decklist1.close()
 
-#define the size of the canvas, incl. space for the title header
-deckheight = 34*(ncount+1)
-deckwidth = 280
+#create a header with the deck's name
+if isMTG:
+    title = Image.new("RGB", (280,34), "black")
+    drawtitle = ImageDraw.Draw(title)
+    drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=fnt_title)
+elif isPokemon:
+    title = Image.new("RGB", (219,35), "black")
+    drawtitle = ImageDraw.Draw(title)
+    drawtitle.text((10, 8),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=pokefnt_title)
 
+if doSideboard:
+    #create a Sideboard partition
+    sideboard = Image.new("RGB", (280,34), "black")
+    drawtitle = ImageDraw.Draw(sideboard)
+    drawtitle.text((10, 7),"Sideboard",(250,250,250), font=fnt_title)
+
+#define the size of the canvas, incl. space for the title header
+if isMTG:
+    deckwidth = 280
+    deckheight = 34*(ncount+1)
+elif isPokemon:
+    deckwidth = 219
+    deckheight = 35*(ncount+1)
+    
 #reset the sideboard marker
 isSideboard = 0
 
@@ -209,76 +237,206 @@ deck = Image.new("RGB", (deckwidth, deckheight), "white")
 deck.paste(title, (0,0))
 
 #now read the decklist
-if not isXML:
+if isMTG:
 
-    #parse an ASCII decklist
-    doitFirst = []
-    doitLast = []
-    doSideMark = []
-    doitFirstSB = []
-    doitLastSB = []
-    sizeFirst = 0
-    sizeLast = 0
-    sizeMark = 0
-    sizeFirstSB = 0
-    sizeLastSB = 0
-    
-    decklist = open(str(sys.argv[1]), 'r')
+    if not isXML:
 
-    for lines in decklist:
-        #necessary for appropriate treatment of the missing mana cost of lands
-        isitland = 0
-        isitspecland = 0
+        #parse an ASCII decklist
+        doitFirst = []
+        doitLast = []
+        doSideMark = []
+        doitFirstSB = []
+        doitLastSB = []
+        sizeFirst = 0
+        sizeLast = 0
+        sizeMark = 0
+        sizeFirstSB = 0
+        sizeLastSB = 0
 
-        if lines[0] == '#':
-            continue
-        
-        if lines in ['\n', '\r\n']:
-            isSideboard = 1
-            if not doSideboard:
-                continue
-            else:
-                # We're at the Sideboard now.
-                print '-- Sideboard --'
-#                deck.paste(sideboard, (0,34*nstep))
-                doSideMark.append('sideboard')
-                doSideMark.append('sideboard')
-                doSideMark.append('sideboard')
-                doSideMark.append('sideboard')
-                sizeMark = sizeMark + 1
-#                nstep = nstep + 1
+        decklist = open(str(sys.argv[1]), 'r')
+
+        for lines in decklist:
+            #necessary for appropriate treatment of the missing mana cost of lands
+            isitland = 0
+            isitspecland = 0
+
+            if lines[0] == '#':
                 continue
 
-        if (isSideboard == 1) and (not doSideboard):
-            continue
-        
-        #this step checks whether a specific art is requested by the user - provided via the set name
+            if lines in ['\n', '\r\n']:
+                isSideboard = 1
+                if not doSideboard:
+                    continue
+                else:
+                    # We're at the Sideboard now.
+                    print '-- Sideboard --'
+    #                deck.paste(sideboard, (0,34*nstep))
+                    doSideMark.append('sideboard')
+                    doSideMark.append('sideboard')
+                    doSideMark.append('sideboard')
+                    doSideMark.append('sideboard')
+                    sizeMark = sizeMark + 1
+    #                nstep = nstep + 1
+                    continue
 
-        card = scraper.get_card_info(lines)
-        if card is None:
-            continue
-        name = card.name
-        set = card.set
-        cost = card.cost
-        quantity = card.quantity
-
-        if isSideboard == 1:
-            if not doSideboard:
+            if (isSideboard == 1) and (not doSideboard):
                 continue
+
+            #this step checks whether a specific art is requested by the user - provided via the set name
+
+            card = scraper.get_card_info(lines)
+            if card is None:
+                continue
+            name = card.name
+            set = card.set
+            cost = card.cost
+            quantity = card.quantity
+
+            if isSideboard == 1:
+                if not doSideboard:
+                    continue
+                else:
+                    if cost == "*\n":
+                        doitLastSB.append(quantity)
+                        doitLastSB.append(name)
+                        doitLastSB.append(set)
+                        doitLastSB.append(cost)
+                        sizeLastSB = sizeLastSB + 1
+                    else:
+                        doitFirstSB.append(quantity)
+                        doitFirstSB.append(name)
+                        doitFirstSB.append(set)
+                        doitFirstSB.append(cost)
+                        sizeFirstSB = sizeFirstSB + 1
             else:
                 if cost == "*\n":
-                    doitLastSB.append(quantity)
-                    doitLastSB.append(name)
-                    doitLastSB.append(set)
-                    doitLastSB.append(cost)
-                    sizeLastSB = sizeLastSB + 1
+                    doitLast.append(quantity)
+                    doitLast.append(name)
+                    doitLast.append(set)
+                    doitLast.append(cost)
+                    sizeLast = sizeLast + 1
                 else:
-                    doitFirstSB.append(quantity)
-                    doitFirstSB.append(name)
-                    doitFirstSB.append(set)
-                    doitFirstSB.append(cost)
-                    sizeFirstSB = sizeFirstSB + 1
-        else:
+                    doitFirst.append(quantity)
+                    doitFirst.append(name)
+                    doitFirst.append(set)
+                    doitFirst.append(cost)
+                    sizeFirst = sizeFirst + 1
+
+        doitAll = doitFirst+doitLast
+        sizeAll = sizeFirst+sizeLast
+        if doSideboard:
+            doitAll = doitAll+doSideMark
+            sizeAll = sizeAll+sizeMark
+            if sizeFirstSB != 0:
+                doitAll = doitAll+doitFirstSB
+                sizeAll = sizeAll+sizeFirstSB
+            if sizeLastSB != 0:
+                doitAll = doitAll+doitLastSB
+                sizeAll = sizeAll+sizeLastSB
+        print "final list to be stacked: ",doitAll,sizeAll
+
+        for nAll in range(sizeAll):
+            quantity = doitAll[0+4*nAll]
+            name = doitAll[1+4*nAll]
+            set = doitAll[2+4*nAll]
+            cost = doitAll[3+4*nAll]
+
+            if quantity == 'sideboard':
+                deck.paste(sideboard, (0,34*nstep))
+                nstep = nstep + 1
+                continue
+
+            #all card arts are found on magiccards.info
+        #    cmcscan = cmctree.xpath('//a[img]/@href')
+
+            if name.find(" // ") != -1:
+                namesplit = name.replace(" // ","/")
+                lookupScan = scraper.download_scan(namesplit,set)
+            else:
+                lookupScan = scraper.download_scan(name,set)
+
+    #        print name, lookupScan
+
+            img = Image.open(lookupScan)
+            if name.find(" // ") != -1:
+                img = img.rotate(-90)
+
+            #check if im has Alpha band...
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+
+            #resize the gradient to the size of im...
+            alpha = gradient.resize(img.size)
+
+            #put alpha in the alpha band of im...
+            img.putalpha(alpha)
+
+            bkgd = Image.new("RGB", img.size, "black")
+            bkgd.paste(img, (0,0), mask=img)
+
+            cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+
+            draw = ImageDraw.Draw(cut)
+            #create text outline
+            draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            #enter text
+            draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+
+            cmc = Image.new('RGBA',(16*len(cost), 16))
+
+            GenerateCMC(name, set)
+
+            #place the cropped picture of the current card
+            deck.paste(cut, (0,34*nstep))
+
+            #adjust cmc size to reflex manacost greater than 9
+            if adjustcmc:
+                deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
+                adjustcmc = False
+            else:
+                deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
+
+            nstep = nstep+1
+
+        decklist.close()
+
+    else:
+
+        #parse the XML decklist
+        doitFirst = []
+        doitLast = []
+        doSideMark = []
+        doitFirstSB = []
+        doitLastSB = []
+        sizeFirst = 0
+        sizeLast = 0
+        sizeMark = 0
+        sizeFirstSB = 0
+        sizeLastSB = 0
+
+        for n in range(ncountMB):
+            #necessary for appropriate treatment of the missing mana cost of lands
+            isitland = 0
+            isitspecland = 0
+
+            #reset the new parser
+            set = None
+            scan_part1 = ' '
+
+            name = modonames[n]
+            quantity = modoquant[n]
+
+            card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
+            if card is None:
+                continue
+            name = card.name
+            set = card.set
+            cost = card.cost
+            quantity = card.quantity
+
             if cost == "*\n":
                 doitLast.append(quantity)
                 doitLast.append(name)
@@ -292,262 +450,189 @@ if not isXML:
                 doitFirst.append(cost)
                 sizeFirst = sizeFirst + 1
 
-    doitAll = doitFirst+doitLast
-    sizeAll = sizeFirst+sizeLast
-    if doSideboard:
-        doitAll = doitAll+doSideMark
-        sizeAll = sizeAll+sizeMark
-        if sizeFirstSB != 0:
-            doitAll = doitAll+doitFirstSB
-            sizeAll = sizeAll+sizeFirstSB
-        if sizeLastSB != 0:
-            doitAll = doitAll+doitLastSB
-            sizeAll = sizeAll+sizeLastSB
-    print "final list to be stacked: ",doitAll,sizeAll
-            
-    for nAll in range(sizeAll):
-        quantity = doitAll[0+4*nAll]
-        name = doitAll[1+4*nAll]
-        set = doitAll[2+4*nAll]
-        cost = doitAll[3+4*nAll]
+        if ncountSB != 0:
 
-        if quantity == 'sideboard':
-            deck.paste(sideboard, (0,34*nstep))
-            nstep = nstep + 1
-            continue
+            print '-- Sideboard --'
+            doSideMark.append('sideboard')
+            doSideMark.append('sideboard')
+            doSideMark.append('sideboard')
+            doSideMark.append('sideboard')
+            sizeMark = sizeMark + 1
 
-        #all card arts are found on magiccards.info
-    #    cmcscan = cmctree.xpath('//a[img]/@href')
+            for n in range(ncountSB):
 
-        if name.find(" // ") != -1:
-            namesplit = name.replace(" // ","/")
-            lookupScan = scraper.download_scan(namesplit,set)
-        else:
-            lookupScan = scraper.download_scan(name,set)
+                ncount_card = 0
 
-#        print name, lookupScan
-            
-        img = Image.open(lookupScan)
-        if name.find(" // ") != -1:
-            img = img.rotate(-90)
-        
-        #check if im has Alpha band...
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
+                #necessary for appropriate treatment of the missing mana cost of lands
+                isitland = 0
+                isitspecland = 0
 
-        #resize the gradient to the size of im...
-        alpha = gradient.resize(img.size)
+                #reset the new parser
+                set = ' '
+                scan_part1 = ' '
 
-        #put alpha in the alpha band of im...
-        img.putalpha(alpha)
+                name = modonamesSB[n]
+                quantity = modoquantSB[n]
 
-        bkgd = Image.new("RGB", img.size, "black")
-        bkgd.paste(img, (0,0), mask=img)
+                card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
+                if card is None:
+                    continue
+                name = card.name
+                set = card.set
+                cost = card.cost
+                quantity = card.quantity
 
-        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
 
-        draw = ImageDraw.Draw(cut)
-        #create text outline
-        draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        #enter text
-        draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+                if cost == "*\n":
+                    doitLastSB.append(quantity)
+                    doitLastSB.append(name)
+                    doitLastSB.append(set)
+                    doitLastSB.append(cost)
+                    sizeLastSB = sizeLastSB + 1
+                else:
+                    doitFirstSB.append(quantity)
+                    doitFirstSB.append(name)
+                    doitFirstSB.append(set)
+                    doitFirstSB.append(cost)
+                    sizeFirstSB = sizeFirstSB + 1
 
-        cmc = Image.new('RGBA',(16*len(cost), 16))
+        doitAll = doitFirst+doitLast
+        sizeAll = sizeFirst+sizeLast
+        if sizeMark != 0:
+            doitAll = doitAll+doSideMark
+            sizeAll = sizeAll+sizeMark
+            if sizeFirstSB != 0:
+                doitAll = doitAll+doitFirstSB
+                sizeAll = sizeAll+sizeFirstSB
+            if sizeLastSB != 0:
+                doitAll = doitAll+doitLastSB
+                sizeAll = sizeAll+sizeLastSB
+        print "final list to be stacked: ",doitAll,sizeAll
 
-        GenerateCMC(name, set)
+        for nAll in range(sizeAll):
+            quantity = doitAll[0+4*nAll]
+            name = doitAll[1+4*nAll]
+            set = doitAll[2+4*nAll]
+            cost = doitAll[3+4*nAll]
 
-        #place the cropped picture of the current card
-        deck.paste(cut, (0,34*nstep))
+            print "stacking: ",name
 
-        #adjust cmc size to reflex manacost greater than 9
-        if adjustcmc:
-            deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
-            adjustcmc = False
-        else:
-            deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
-
-        nstep = nstep+1
-
-    decklist.close()
-
-else:
-
-    #parse the XML decklist
-    doitFirst = []
-    doitLast = []
-    doSideMark = []
-    doitFirstSB = []
-    doitLastSB = []
-    sizeFirst = 0
-    sizeLast = 0
-    sizeMark = 0
-    sizeFirstSB = 0
-    sizeLastSB = 0
-    
-    for n in range(ncountMB):
-        #necessary for appropriate treatment of the missing mana cost of lands
-        isitland = 0
-        isitspecland = 0
-
-        #reset the new parser
-        set = None
-        scan_part1 = ' '
-        
-        name = modonames[n]
-        quantity = modoquant[n]
-
-        card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
-        if card is None:
-            continue
-        name = card.name
-        set = card.set
-        cost = card.cost
-        quantity = card.quantity
-        
-        if cost == "*\n":
-            doitLast.append(quantity)
-            doitLast.append(name)
-            doitLast.append(set)
-            doitLast.append(cost)
-            sizeLast = sizeLast + 1
-        else:
-            doitFirst.append(quantity)
-            doitFirst.append(name)
-            doitFirst.append(set)
-            doitFirst.append(cost)
-            sizeFirst = sizeFirst + 1
-
-    if ncountSB != 0:
-        
-        print '-- Sideboard --'
-        doSideMark.append('sideboard')
-        doSideMark.append('sideboard')
-        doSideMark.append('sideboard')
-        doSideMark.append('sideboard')
-        sizeMark = sizeMark + 1
-        
-        for n in range(ncountSB):
-
-            ncount_card = 0
-
-            #necessary for appropriate treatment of the missing mana cost of lands
-            isitland = 0
-            isitspecland = 0
-
-            #reset the new parser
-            set = ' '
-            scan_part1 = ' '
-
-            name = modonamesSB[n]
-            quantity = modoquantSB[n]
-
-            card = scraper.get_card_info("{q} {n}".format(q=quantity, n=name))
-            if card is None:
+            if quantity == 'sideboard':
+                deck.paste(sideboard, (0,34*nstep))
+                nstep = nstep + 1
                 continue
-            name = card.name
-            set = card.set
-            cost = card.cost
-            quantity = card.quantity
 
-
-            if cost == "*\n":
-                doitLastSB.append(quantity)
-                doitLastSB.append(name)
-                doitLastSB.append(set)
-                doitLastSB.append(cost)
-                sizeLastSB = sizeLastSB + 1
+    #        lookupScan = scraper.download_scan(name, set)
+            if name.find(" // ") != -1:
+                namesplit = name.replace(" // ","/")
+                lookupScan = scraper.download_scan(namesplit,set)
             else:
-                doitFirstSB.append(quantity)
-                doitFirstSB.append(name)
-                doitFirstSB.append(set)
-                doitFirstSB.append(cost)
-                sizeFirstSB = sizeFirstSB + 1
+                lookupScan = scraper.download_scan(name,set)
 
-    doitAll = doitFirst+doitLast
-    sizeAll = sizeFirst+sizeLast
-    if sizeMark != 0:
-        doitAll = doitAll+doSideMark
-        sizeAll = sizeAll+sizeMark
-        if sizeFirstSB != 0:
-            doitAll = doitAll+doitFirstSB
-            sizeAll = sizeAll+sizeFirstSB
-        if sizeLastSB != 0:
-            doitAll = doitAll+doitLastSB
-            sizeAll = sizeAll+sizeLastSB
-    print "final list to be stacked: ",doitAll,sizeAll
+    #        print name, lookupScan
+
+            img = Image.open(lookupScan)
+            if name.find(" // ") != -1:
+                img = img.rotate(-90)
+
+            #check if im has Alpha band...
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+
+            #resize the gradient to the size of im...
+            alpha = gradient.resize(img.size)
+
+            #put alpha in the alpha band of im...
+            img.putalpha(alpha)
+
+            bkgd = Image.new("RGB", img.size, "black")
+            bkgd.paste(img, (0,0), mask=img)
+
+            cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+
+            draw = ImageDraw.Draw(cut)
+            #create text outline
+            draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+            #enter text
+            draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+
+            cmc = Image.new('RGBA',(16*len(cost), 16))
+
+            GenerateCMC(name, set)
+
+            #place the cropped picture of the current card
+            deck.paste(cut, (0,34*nstep))
+
+            #adjust cmc size to reflex manacost greater than 9
+            if adjustcmc:
+                deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
+                adjustcmc = False
+            else:
+                deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
+
+            nstep = nstep+1
+
+elif isPokemon:
+
+    decklist = open(str(sys.argv[1]), 'r')
+
+    for lines in decklist:
+
+        if lines[0].isdigit():
+            data = lines.split(' ')
+            data[-1] = data[-1][:-1]
+
+            quantity = data[0]
+            set = data[-2]
+            setID = data[-1]
+            name = data[1]+' '
+
+            for item in data[2:-2]:
+                name += item+' '
+
+            lookupScan,displayname = scraper.download_scanPKMN(name,set,setID)
+            print displayname, set, setID
             
-    for nAll in range(sizeAll):
-        quantity = doitAll[0+4*nAll]
-        name = doitAll[1+4*nAll]
-        set = doitAll[2+4*nAll]
-        cost = doitAll[3+4*nAll]
+            img = Image.open(lookupScan)
 
-        print "stacking: ",name
-        
-        if quantity == 'sideboard':
-            deck.paste(sideboard, (0,34*nstep))
-            nstep = nstep + 1
-            continue
+            #check if im has Alpha band...
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
 
-#        lookupScan = scraper.download_scan(name, set)
-        if name.find(" // ") != -1:
-            namesplit = name.replace(" // ","/")
-            lookupScan = scraper.download_scan(namesplit,set)
-        else:
-            lookupScan = scraper.download_scan(name,set)
+            #resize the gradient to the size of im...
+            alpha = gradient.resize(img.size)
 
-#        print name, lookupScan
-            
-        img = Image.open(lookupScan)
-        if name.find(" // ") != -1:
-            img = img.rotate(-90)
-        
-        #check if im has Alpha band...
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
+            #put alpha in the alpha band of im...
+            img.putalpha(alpha)
 
-        #resize the gradient to the size of im...
-        alpha = gradient.resize(img.size)
+            bkgd = Image.new("RGB", img.size, "black")
+            bkgd.paste(img, (0,0), mask=img)
 
-        #put alpha in the alpha band of im...
-        img.putalpha(alpha)
+            cut = bkgd.crop((xtopPKMN, ytopPKMN+90, xbotPKMN-10, ybotPKMN+100))
+            cut = cut.resize((deckwidth,34))
 
-        bkgd = Image.new("RGB", img.size, "black")
-        bkgd.paste(img, (0,0), mask=img)
+            draw = ImageDraw.Draw(cut)
+            #create text outline
+            draw.text((6, 11),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
+            draw.text((8, 11),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
+            draw.text((6, 13),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
+            draw.text((8, 13),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
+            #enter text
+            draw.text((7, 12),str(quantity)+'  '+displayname,(250,250,250), font=pokefnt)
 
-        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+            #place the cropped picture of the current card
+            deck.paste(cut, (0,35*nstep))
 
-        draw = ImageDraw.Draw(cut)
-        #create text outline
-        draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-        #enter text
-        draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+            nstep = nstep+1
 
-        cmc = Image.new('RGBA',(16*len(cost), 16))
-
-        GenerateCMC(name, set)
-
-        #place the cropped picture of the current card
-        deck.paste(cut, (0,34*nstep))
-
-        #adjust cmc size to reflex manacost greater than 9
-        if adjustcmc:
-            deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
-            adjustcmc = False
-        else:
-            deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
-
-        nstep = nstep+1
-        
-            
-deck = deck.crop((0, 0, deckwidth-10, deckheight))
-
+if isMTG:
+    deck = deck.crop((0, 0, deckwidth-10, deckheight))
+elif isPokemon:
+    deck = deck.crop((0, 0, deckwidth-10, 35*nstep))
+    
 deck.save(str(sys.argv[1])[0:-4]+".png")
 altpath = config.Get('options', 'output_path')
 if altpath is not None:
