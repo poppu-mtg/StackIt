@@ -25,7 +25,7 @@ check9 = '0123456'
 def GenerateCMC(name, set):
     global adjustcmc
     diskcost = cost.strip().replace('*', '_').replace('/','-')
-#    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
+    # lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
@@ -54,8 +54,8 @@ def GenerateCMC(name, set):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((16,16))
-                cmc.paste(tap, (15*n,0), mask=tap)
+                tap = tap0.resize((16, 16))
+                cmc.paste(tap, (15 * n, 0), mask=tap)
             else:
                 if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
                     finalcost = cost[n]+cost[n+1]
@@ -68,9 +68,9 @@ def GenerateCMC(name, set):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((16,16))
-                cmc.paste(tap, (15*n,0), mask=tap)
-        cmc.save((lookupCMC).replace('che-','che/'))
+                tap = tap0.resize((16, 16))
+                cmc.paste(tap, (15 * n, 0), mask=tap)
+        cmc.save(lookupCMC)
 
 ncount = 0
 ncountMB = 0
@@ -109,7 +109,7 @@ isPokemon = False
 isMTG = True #default setting is Magic: the Gathering decklist
 
 # create a horizontal gradient...
-gradient = Image.new('L', (255,1))
+gradient = Image.new('L', (255, 1))
 
 #map the gradient
 #for x in range(64):
@@ -119,11 +119,11 @@ gradient = Image.new('L', (255,1))
 #for x in range(128):
 #    gradient.putpixel((127+x,0),max(int(190-1.5*x),0))
 for x in range(128):
-    gradient.putpixel((x,0),int(1.5*x))
+    gradient.putpixel((x, 0), int(1.5 * x))
 for x in range(64):
-    gradient.putpixel((127+x,0),190+x)
+    gradient.putpixel((127 + x, 0), 190 + x)
 for x in range(64):
-    gradient.putpixel((190+x,0),254)
+    gradient.putpixel((190 + x, 0), 254)
 
 #check if we should include the sideboard
 isSideboard = 0
@@ -134,7 +134,7 @@ else:
         doSideboard = True
     elif str(sys.argv[2]) in ['nosb']:
         doSideboard = False
-    else: 
+    else:
         doSideboard = config.Get('options', 'display_sideboard')
 
 #open user input decklist
@@ -160,30 +160,26 @@ if isXML:
                 continue
             else:
                 if atype.get('Name') in modoformatSB:
-                    modoformatSB[atype.get('Name').replace(' / ',' // ')] += int(atype.get('Quantity'))
+                    modoformatSB[atype.get('Name').replace(' / ', ' // ')] += int(atype.get('Quantity'))
                 else:
-                    modoformatSB[atype.get('Name').replace(' / ',' // ')] = int(atype.get('Quantity'))
+                    modoformatSB[atype.get('Name').replace(' / ', ' // ')] = int(atype.get('Quantity'))
         else:
             if atype.get('Name') in modoformat:
                 modoformat[atype.get('Name')] += int(atype.get('Quantity'))
             else:
                 modoformat[atype.get('Name')] = int(atype.get('Quantity'))
 
-    modonames = [x.replace(' / ',' // ') for x in list(modoformat.keys())]
+    modonames = [x.replace(' / ', ' // ') for x in list(modoformat.keys())]
     modoquant = [modoformat[x] for x in modonames]
     ncountMB = len(modonames)
-    modonamesSB = [x.replace(' / ',' // ') for x in list(modoformatSB.keys())]
+    modonamesSB = [x.replace(' / ', ' // ') for x in list(modoformatSB.keys())]
     modoquantSB = [modoformatSB[x] for x in modonamesSB]
     ncountSB = len(modonamesSB)
     print ncountMB, modonames, modoquant
     print ncountSB, modonamesSB, modoquantSB
-    ncount=ncountMB+ncountSB+1 #1 extra space for the sideboard marker
-    
+    ncount = ncountMB + ncountSB + 1 #1 extra space for the sideboard marker
 else:
-
     for lines1 in decklist1:
-    
-#        if lines1[0] == '#':
         if lines1[0] in ['#', '*']:
             if lines1.lower().find('* pok') != -1:
                 print 'Decklist is for Pokemon TCGO ...'
@@ -205,15 +201,15 @@ else:
 
 decklist1.close()
 
-#create a header with the deck's name
+# create a header with the deck's name
 if isMTG:
-    title = Image.new("RGB", (280,34), "black")
+    title = Image.new("RGB", (280, 34), "black")
     drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((10, 7),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=fnt_title)
+    drawtitle.text((10, 7), os.path.basename(str(sys.argv[1]))[0:-4], (250, 250, 250), font=fnt_title)
 elif isPokemon:
-    title = Image.new("RGB", (219,35), "black")
+    title = Image.new("RGB", (219, 35), "black")
     drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((10, 8),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=pokefnt_title)
+    drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=pokefnt_title)
 
 if doSideboard:
     #create a Sideboard partition
@@ -591,9 +587,9 @@ elif isPokemon:
             name = data[1]+' '
 
             for item in data[2:-2]:
-                name += item+' '
+                name += item + ' '
 
-            lookupScan,displayname = scraper.download_scanPKMN(name,set,setID)
+            lookupScan, displayname = scraper.download_scanPKMN(name, set, setID)
             print displayname, set, setID
             
             img = Image.open(lookupScan)
@@ -609,31 +605,31 @@ elif isPokemon:
             img.putalpha(alpha)
 
             bkgd = Image.new("RGB", img.size, "black")
-            bkgd.paste(img, (0,0), mask=img)
+            bkgd.paste(img, (0, 0), mask=img)
 
             cut = bkgd.crop((xtopPKMN, ytopPKMN+90, xbotPKMN-10, ybotPKMN+100))
             cut = cut.resize((deckwidth,34))
 
             draw = ImageDraw.Draw(cut)
             #create text outline
-            draw.text((6, 11),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
-            draw.text((8, 11),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
-            draw.text((6, 13),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
-            draw.text((8, 13),str(quantity)+'  '+displayname,(0,0,0), font=pokefnt)
+            draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
+            draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
+            draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
+            draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
             #enter text
-            draw.text((7, 12),str(quantity)+'  '+displayname,(250,250,250), font=pokefnt)
+            draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=pokefnt)
 
             #place the cropped picture of the current card
-            deck.paste(cut, (0,35*nstep))
+            deck.paste(cut, (0, 35 * nstep))
 
             nstep = nstep+1
 
 if isMTG:
-    deck = deck.crop((0, 0, deckwidth-10, deckheight))
+    deck = deck.crop((0, 0, deckwidth - 10, deckheight))
 elif isPokemon:
-    deck = deck.crop((0, 0, deckwidth-10, 35*nstep))
+    deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
     
-deck.save(str(sys.argv[1])[0:-4]+".png")
+deck.save(str(sys.argv[1])[0:-4] + ".png")
 altpath = config.Get('options', 'output_path')
 if altpath is not None:
     deck.save(altpath)

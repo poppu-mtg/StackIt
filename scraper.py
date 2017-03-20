@@ -47,7 +47,7 @@ def download_scan(name, expansion):
     return lookupScan
 
 def download_scanPKMN(name, expansion, expID):
-    name = unicodedata.normalize('NFD', str(name[:-1], 'ISO-8859-1')).encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
+    name = unaccent(name[:-1].decode('latin-1'))
     displayname = name
     name = name.replace(' ', '-').replace("'", '')
 
@@ -59,6 +59,7 @@ def download_scanPKMN(name, expansion, expID):
         return lookupScan, displayname
 
     pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
+    print(pokeurl)
     urllib.request.urlretrieve(pokeurl, localname)
     os.rename(localname, lookupScan)
 
@@ -187,3 +188,6 @@ def get_card_info(line):
             expansion = "uh"
         cost = "*\n"
     return Card(name, expansion, cost, quantity)
+
+def unaccent(s):
+    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
