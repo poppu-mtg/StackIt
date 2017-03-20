@@ -1,4 +1,9 @@
-import os, urllib
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+import os, urllib.request, urllib.parse, urllib.error
 import requests
 import config
 
@@ -23,7 +28,7 @@ def download_scan(name, expansion):
         name = name.split('/')[0]+' ('+name+')'
 
     scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
-    print(scannumber)
+    # print(scannumber)
     cardloc = None
     for item in scannumber:
         if item.find("/en/"):
@@ -32,42 +37,41 @@ def download_scan(name, expansion):
     if cardloc is None:
         print('ERROR - Could not find {0} ({1})'.format(name, expansion))
     else:
-        print(cardloc)
+        # print(cardloc)
+        pass
 
     url = 'http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
-    #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
-    urllib.urlretrieve(url, cardloc[3]+'jpg')
+    urllib.request.urlretrieve(url, cardloc[3]+'jpg')
     os.rename(cardloc[3] + 'jpg', lookupScan)
 
     return lookupScan
 
 def download_scanPKMN(name, expansion, expID):
-    name = unicodedata.normalize('NFD', unicode(name[:-1], 'ISO-8859-1')).encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
+    name = unicodedata.normalize('NFD', str(name[:-1], 'ISO-8859-1')).encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
     displayname = name
-    name = name.replace(' ','-')
-    name = ''.join(e for e in name if e != "'")
+    name = name.replace(' ', '-').replace("'", '')
 
-    localname = 'PKMN-'+name+'-'+expansion+'-'+expID+'.jpg'
-    lookupScan = os.path.join('.','Scans', localname)
+    localname = 'PKMN-{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
+
+    lookupScan = os.path.join('.', 'Scans', localname)
 
     if os.path.exists(lookupScan):
-        return lookupScan,displayname
-    
-    pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/'+name+'-'+expansion+'-'+expID+'.jpg'
-    urllib.urlretrieve(pokeurl, localname)
+        return lookupScan, displayname
+
+    pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
+    urllib.request.urlretrieve(pokeurl, localname)
     os.rename(localname, lookupScan)
-                
-    return lookupScan,displayname
-    
+
+    return lookupScan, displayname
+
 def get_card_info(line):
-    
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
     line = line.replace('\t', ' ')
-    
+
     ncount_card = 0
     isitland = False
-    scan_part1 = ' '
+    scan_part1 = None
     #flag for split cards
     splitcost = False
     n_cost = 0
@@ -79,48 +83,47 @@ def get_card_info(line):
         data = line.split(" / ")
         #for non-XML files, we need to check if this is a split card
         if len(data) > 2:
-            name = data[0].split(" ",1)[1]+' // '+data[1]
+            name = data[0].split(" ", 1)[1] + ' // ' + data[1]
             expansion = data[2].split("\n")[0].lower()
         else:
             #split the info at the first blank space
-            name = data[0].split(" ",1)[1]
+            name = data[0].split(" ", 1)[1]
             expansion = data[1].split("\n")[0].lower()
     else:
-
         #split the info at the first blank space
-        quantity = int(line.split(" ",1)[0])
-        name = line.split(" ",1)[1].strip()
+        quantity = int(line.split(" ", 1)[0])
+        name = line.split(" ", 1)[1].strip()
         expansion = config.Get('cards', name.lower())
 
-    print(name, expansion)
+    print('Looking up {0} ({1})'.format(name, expansion))
     if quantity == 0:
         return None
 
-    if name.lower() in ["plains","island","swamp","mountain","forest"]:
+    if name.lower() in ["plains", "island", "swamp", "mountain", "forest"]:
         isitland = True
 
     if not isitland:
 
         #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
-        name_sub = name.replace(",","")
-        name_sub = name_sub.replace("'"," ")
-        print(name_sub)
+        name_sub = name.replace(",", "")
+        name_sub = name_sub.replace("'", " ")
+        # print(name_sub)
 
-        cmcsearch = name_sub.replace(" ","+")
-        scansearch = name_sub.replace(" s ","s ")
+        cmcsearch = name_sub.replace(" ", "+")
+        scansearch = name_sub.replace(" s ", "s ")
 #        scansearch = scansearch.replace(" ","-")
         if name_sub.find(' // ') != -1:
-            scansearch = scansearch.replace(" // ",'-')
+            scansearch = scansearch.replace(" // ", '-')
         else:
-            scansearch = scansearch.replace(" ","-")
+            scansearch = scansearch.replace(" ", "-")
         scansearch = scansearch.lower()
-        print cmcsearch,scansearch
+        # print(cmcsearch, scansearch)
 
         if expansion is None:
             cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
         else:
-            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name&s={set}'.format(cmcsearch=cmcsearch,set=expansion)
-        
+            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name&s={set}'.format(cmcsearch=cmcsearch, set=expansion)
+
         cmcpage = requests.get(cmcweb)
         cmctree = html.fromstring(cmcpage.content)
 
@@ -130,10 +133,10 @@ def get_card_info(line):
         # print cmcscan
         for item in cmcscan:
             # print item,ncount_card
-            if scan_part1 != " ":
+            if scan_part1 != None:
                 continue
             if item.find(scankey) == 0:
-                print "found it:",item
+                print("found it:", item)
                 scan_part1 = item.split(scankey)[1]
             ncount_card = ncount_card + 1
         altscan = str(scan_part1.split('/"')[0]).lower()
@@ -141,13 +144,13 @@ def get_card_info(line):
         expansion = altscan[:-1]
 
         cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
-        print cmctext
+        # print(cmctext)
 
         finallist = []
         for item in cmctext:
             if item[-1] == "}":
                 finallist.append(item)
-        print finallist
+        # print(finallist)
 
         if cmctext[0].find("Land") != -1:
             altcmc = '*'
@@ -160,13 +163,13 @@ def get_card_info(line):
                 splitcost = True
                 for item in finallist[0].split(' //'):
                     altcmc_list.append(item.split(" {")[1][:-1].split("}{"))
-                    print name,altcmc_list[n_cost]
+                    # print(name, altcmc_list[n_cost])
                     n_cost += 1
             else:
                 cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
                 altcmc = cmc_part1.split("}{")
                 altcmc = [specmana[x] for x in altcmc]
-                print name,altcmc
+                # print(name, altcmc)
 
         cost = ''
         if splitcost:
@@ -175,7 +178,7 @@ def get_card_info(line):
             cost = cost[:-1]+"\n"
         else:
             cost = "".join(altcmc)+"\n"
-        print name,expansion,cost
+        print((name, expansion, cost))
 
     else:
 
@@ -183,4 +186,4 @@ def get_card_info(line):
         if expansion is None:
             expansion = "uh"
         cost = "*\n"
-    return Card(name,expansion,cost, quantity)
+    return Card(name, expansion, cost, quantity)
