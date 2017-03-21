@@ -1,6 +1,6 @@
 import os, yaml
 
-settings = dict()
+SETTINGS = dict()
 
 if not os.path.exists('settings.yml'):
     with open('settings.yml', 'w') as f:
@@ -16,13 +16,13 @@ options:
 """)
 
 with open('settings.yml') as f:
-    settings = yaml.load(f)
+    SETTINGS = yaml.load(f)
 
 print("==Settings==")
-print(yaml.dump(settings))
+print(yaml.dump(SETTINGS))
 
 def Get(group, name):
     try:
-        return settings[group][name]
+        return SETTINGS[group][name]
     except KeyError:
         return None
