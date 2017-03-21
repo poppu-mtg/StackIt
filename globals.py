@@ -1,7 +1,7 @@
 import collections
 
 # Named Tuple that defines the attribues of a card.
-Card = collections.namedtuple('Card', ['name', 'set', 'cost', 'quantity'])
+Card = collections.namedtuple('Card', ['name', 'set', 'cost', 'quantity', 'collector_num'])
 
 List = collections.namedtuple('List', ['game', 'mainboard', 'sideboard', 'commander'])
 

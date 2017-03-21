@@ -99,7 +99,7 @@ def download_scanHex(name, namescan):
 
     return lookupScan
 
-def get_card_info(line):
+def get_card_info(line, quantity=None):
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
     line = line.replace('\t', ' ')
@@ -112,22 +112,24 @@ def get_card_info(line):
     n_cost = 0
     altcmc_list = []
 
-    quantity = int(line.split(" ",1)[0])
+    if quantity is None:
+        data = line.split(" ", 1)
+        quantity = int(data[0])
+        line = data[1]
 
     if line.find(' / ') != -1:
         data = line.split(" / ")
         #for non-XML files, we need to check if this is a split card
         if len(data) > 2:
-            name = data[0].split(" ", 1)[1] + ' // ' + data[1]
+            name = data[0] + ' // ' + data[1]
             expansion = data[2].split("\n")[0].lower()
         else:
             #split the info at the first blank space
-            name = data[0].split(" ", 1)[1]
+            name = data[0]
             expansion = data[1].split("\n")[0].lower()
     else:
         #split the info at the first blank space
-        quantity = int(line.split(" ", 1)[0])
-        name = line.split(" ", 1)[1].strip()
+        name = line.strip()
         expansion = config.Get('cards', name.lower())
 
     print('Looking up {0} ({1})'.format(name, expansion))
@@ -221,7 +223,7 @@ def get_card_info(line):
         if expansion is None:
             expansion = "uh"
         cost = "*\n"
-    return Card(name, expansion, cost, quantity)
+    return Card(name, expansion, cost, quantity, collector_num=None)
 
 def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
