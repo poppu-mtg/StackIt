@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
@@ -69,10 +70,10 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
     mainguy2 = ''.join(e for e in mainguy if e.isalnum())
     localname = 'HexTCG-'+mainguy2+'_'+typeCM+'.jpg'
     lookupScan = os.path.join('.', 'Scans', localname)
-    
+
     if os.path.exists(lookupScan):
         return lookupScan
-    
+
     if mainguyscan == 'cardback-big':
         url = 'https://hex.tcgbrowser.com/images/cards/'+mainguyscan+'.jpg'
     else:
@@ -82,7 +83,7 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
     os.rename(localname, lookupScan)
 
     return lookupScan
-    
+
 def download_scanHex(name, namescan):
     name2 = ''.join(e for e in name if e.isalnum())
     localname = 'HexTCG-'+name2+'.jpg'
@@ -90,14 +91,14 @@ def download_scanHex(name, namescan):
 
     if os.path.exists(lookupScan):
         return lookupScan
-    
+
     url = 'https://storage.hex.tcgbrowser.com/big/'+namescan+'.jpg'
     #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
     urllib.urlretrieve(url, localname)
     os.rename(localname, lookupScan)
 
     return lookupScan
-    
+
 def get_card_info(line):
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
@@ -222,5 +223,7 @@ def get_card_info(line):
         cost = "*\n"
     return Card(name, expansion, cost, quantity)
 
-def unaccent(s):
-    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
+def unaccent(text):
+    text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
+    text = text.encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
+    return text
