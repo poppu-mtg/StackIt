@@ -721,7 +721,8 @@ elif isHexTCG:
             drawbanner.text((15,15), str(lines), (250,250,250), font=hexfnt_title)
 
             data = lines.split(': ')
-            mainguy = data[1][:-2]
+            #mainguy = data[1][:-2]
+            mainguy = data[1].replace('\r','').replace('\n','')
             if data[0].lower() == 'champion':
                 typeCM = 'C'
                 mainguyscan = HexChampion[mainguy]
@@ -763,7 +764,8 @@ elif isHexTCG:
 
             data = lines.split('x ')
             quantity = data[0]
-            name = data[1][:-2]
+            #name = data[1][:-2]
+            name = data[1].replace('\r','').replace('\n','')
             namescan = HexCards[name]
             #print quantity,name,namescan
 
