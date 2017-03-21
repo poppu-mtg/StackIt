@@ -102,11 +102,30 @@ pokefnt = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabo
 
 pokefnt_title = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
 
-
 #check the input format
 isXML = False
 isPokemon = False
+isHexTCG = False
 isMTG = True #default setting is Magic: the Gathering decklist
+
+#Hex TCG specific variables
+HexChampion = {}
+HexMercenary = {}
+HexCards = {}
+
+hexfnt = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 14)
+hexfnt_title = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 16)
+
+# create a horizontal gradient...
+Hexgradient = Image.new('L', (1,255))
+
+#map the gradient
+for x in range(64):
+    Hexgradient.putpixel((0,x),254)
+for x in range(64):
+    Hexgradient.putpixel((0,64+x),254-x)
+for x in range(128):
+    Hexgradient.putpixel((0,127+x),190-int(1.5*x))
 
 # create a horizontal gradient...
 gradient = Image.new('L', (255,1))
@@ -183,25 +202,64 @@ else:
 
     for lines1 in decklist1:
     
-#        if lines1[0] == '#':
-        if lines1[0] in ['#', '*']:
-            if lines1.lower().find('* pok') != -1:
-                print 'Decklist is for Pokemon TCGO ...'
-                isPokemon = True
-                isMTG = False
-                isSideboard = 0
+        if lines1.lower().find('champion:') != -1 or lines1.lower().find('mercenary:') != -1:
+
+            isHexTCG = True
+            isMTG = False
+
+            listChampions = open(os.path.join('.','HexLists','HexList-Champion.dat'), 'r')
+            for line in listChampions:
+                HexChampion[line.split('.jpg ')[1][:-1]] = line.split('.jpg ')[0]
+            listChampions.close()
+
+            listMercenaries = open(os.path.join('.','HexLists','HexList-Mercenary.dat'), 'r')
+            for line in listMercenaries:
+                HexMercenary[line.split('.jpg ')[1][:-1]] = line.split('.jpg ')[0]
+            listMercenaries.close()
+    
+            listCards = open(os.path.join('.','HexLists','HexList-AllCards.dat'), 'r')
+            for line in listCards:
+                HexCards[line.split('.jpg ')[1][:-1]] = line.split('.jpg ')[0]
+            listCards.close()
+    
             continue
 
-        if lines1 in ['\n', '\r\n']:
-            if isMTG:
-                isSideboard = 1
-                if not doSideboard:
+        if isHexTCG:
+
+            if isSideboard == 1:
+                continue
+
+            if lines1.lower() in ['\n', '\r\n', 'troops\r\n', 'spells\r\n', 'resources\r\n', 'reserves\r\n']:
+                if lines1.lower() == 'reserves\r\n':
+                    isSideboard = 1
+                    continue
+                else:
                     continue
 
-        if (isSideboard == 1) and (not doSideboard):
-            continue
+ 
+            ncount = ncount + 1
 
-        ncount = ncount +1
+        else:
+
+#        if lines1[0] == '#':
+            if lines1[0] in ['#', '*']:
+                if lines1.lower().find('* pok') != -1:
+                    print 'Decklist is for Pokemon TCGO ...'
+                    isPokemon = True
+                    isMTG = False
+                    isSideboard = 0
+                continue
+
+            if lines1 in ['\n', '\r\n']:
+                if isMTG:
+                    isSideboard = 1
+                    if not doSideboard:
+                        continue
+
+            if (isSideboard == 1) and (not doSideboard):
+                continue
+
+            ncount = ncount +1
 
 decklist1.close()
 
@@ -214,6 +272,19 @@ elif isPokemon:
     title = Image.new("RGB", (219,35), "black")
     drawtitle = ImageDraw.Draw(title)
     drawtitle.text((10, 8),os.path.basename(str(sys.argv[1]))[0:-4],(250,250,250), font=pokefnt_title)
+elif isHexTCG:
+    title = Image.new("RGB", (320,34), "black")
+    nametitle = str(sys.argv[1])[0:-4]
+    nshard = 0
+    for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
+        #print nametitle,nshard
+        if nametitle.find(shard) != -1:
+            nametitle = nametitle.replace(shard,'')
+            newshard = Image.open(os.path.join('.','Mana',shard+'.png')).resize((20,20))
+            title.paste(newshard,(10+nshard*20,7))
+            nshard = nshard + 1
+    drawtitle = ImageDraw.Draw(title)
+    drawtitle.text((15+nshard*20, 12),os.path.basename(nametitle), (250,250,250), font=hexfnt_title)
 
 if doSideboard:
     #create a Sideboard partition
@@ -227,6 +298,9 @@ if isMTG:
     deckheight = 34*(ncount+1)
 elif isPokemon:
     deckwidth = 219
+    deckheight = 35*(ncount+1)
+elif isHexTCG:
+    deckwidth = 320
     deckheight = 35*(ncount+1)
     
 #reset the sideboard marker
@@ -628,10 +702,108 @@ elif isPokemon:
 
             nstep = nstep+1
 
+    decklist.close()
+
+elif isHexTCG:
+
+    banner = Image.new("RGB", (deckheight-35, 50), "black")
+
+    decklist = open(str(sys.argv[1]), 'r')
+
+    for lines in decklist:
+
+        if isSideboard == 1:
+            continue
+
+        if lines.lower().find('champion:') != -1 or lines.lower().find('mercenary:') != -1:
+
+            drawbanner = ImageDraw.Draw(banner)
+            drawbanner.text((15,15), str(lines), (250,250,250), font=hexfnt_title)
+
+            data = lines.split(': ')
+            mainguy = data[1][:-2]
+            if data[0].lower() == 'champion':
+                typeCM = 'C'
+                mainguyscan = HexChampion[mainguy]
+            else:
+                typeCM = 'M'
+                mainguyscan = HexMercenary[mainguy]
+            #print mainguy,mainguyscan
+
+            lookupScan = scraper.download_scanHexCM(mainguy,mainguyscan,typeCM)
+
+            mainguyImg = Image.open(lookupScan)
+            mainguycut = mainguyImg.crop((135,55,185,275))
+
+            banner = banner.rotate(90, expand=True)
+
+            #check if im has Alpha band...
+            if mainguycut.mode != 'RGBA':
+                mainguycut = mainguycut.convert('RGBA')
+
+            #resize the gradient to the size of im...
+            alpha = Hexgradient.resize(mainguycut.size)
+
+            #put alpha in the alpha band of im...
+            mainguycut.putalpha(alpha)
+
+            banner.paste(mainguycut, (0,0), mask=mainguycut)
+
+            deck.paste(banner, (0,35))
+
+        elif lines.lower() in ['\n', '\r\n', 'troops\r\n', 'spells\r\n', 'resources\r\n', 'reserves\r\n']:
+
+            if lines.lower() == 'reserves\r\n':
+                isSideboard = 1
+                continue
+            else:
+                continue
+
+        else:
+
+            data = lines.split('x ')
+            quantity = data[0]
+            name = data[1][:-2]
+            namescan = HexCards[name]
+            #print quantity,name,namescan
+
+            lookupScan = scraper.download_scanHex(name,namescan)
+            
+            img = Image.open(lookupScan)
+            img = img.crop((39,130,309,164))
+
+            #resize the gradient to the size of im...
+            alpha = gradient.resize(img.size)
+
+            #put alpha in the alpha band of im...
+            img.putalpha(alpha)
+
+            bkgd = Image.new("RGB", img.size, "black")
+            bkgd.paste(img, (0,0), mask=img)
+
+            cut = bkgd
+
+            draw = ImageDraw.Draw(cut)
+            #create text outline
+            draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
+            draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
+            draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
+            draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
+            #enter text
+            draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=hexfnt)
+
+            deck.paste(cut, (50,35*nstep))
+
+            nstep = nstep + 1
+
+    decklist.close()
+            
 if isMTG:
     deck = deck.crop((0, 0, deckwidth-10, deckheight))
 elif isPokemon:
     deck = deck.crop((0, 0, deckwidth-10, 35*nstep))
+elif isHexTCG:
+    deck = deck.crop((0, 0, deckwidth-22, deckheight))
     
 deck.save(str(sys.argv[1])[0:-4]+".png")
 altpath = config.Get('options', 'output_path')
