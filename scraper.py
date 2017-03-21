@@ -65,6 +65,39 @@ def download_scanPKMN(name, expansion, expID):
 
     return lookupScan, displayname
 
+def download_scanHexCM(mainguy, mainguyscan, typeCM):
+    mainguy2 = ''.join(e for e in mainguy if e.isalnum())
+    localname = 'HexTCG-'+mainguy2+'_'+typeCM+'.jpg'
+    lookupScan = os.path.join('.', 'Scans', localname)
+    
+    if os.path.exists(lookupScan):
+        return lookupScan
+    
+    if mainguyscan == 'cardback-big':
+        url = 'https://hex.tcgbrowser.com/images/cards/'+mainguyscan+'.jpg'
+    else:
+        url = 'https://storage.hex.tcgbrowser.com/big/'+mainguyscan+'.jpg'
+        #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
+    urllib.urlretrieve(url, localname)
+    os.rename(localname, lookupScan)
+
+    return lookupScan
+    
+def download_scanHex(name, namescan):
+    name2 = ''.join(e for e in name if e.isalnum())
+    localname = 'HexTCG-'+name2+'.jpg'
+    lookupScan = os.path.join('.', 'Scans', localname)
+
+    if os.path.exists(lookupScan):
+        return lookupScan
+    
+    url = 'https://storage.hex.tcgbrowser.com/big/'+namescan+'.jpg'
+    #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
+    urllib.urlretrieve(url, localname)
+    os.rename(localname, lookupScan)
+
+    return lookupScan
+    
 def get_card_info(line):
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
