@@ -30,8 +30,8 @@ def parse_list(decklist):
         print('decklist is in MTGO XML format')
         decklist = preprocess_xml(decklist)
 
-    for lines1 in decklist:
-        line = lines1.strip().replace('\t', ' ')
+    for raw_line in decklist:
+        line = raw_line.strip().replace('\t', ' ')
         if len(line) == 0:
             if game == MTG:
                 isSideboard = True
@@ -57,12 +57,12 @@ def parse_list(decklist):
                 HexChampion[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listChampions.close()
 
-            listMercenaries = open(os.path.join('.','HexLists','HexList-Mercenary.dat'), 'r')
+            listMercenaries = open(os.path.join('.', 'HexLists', 'HexList-Mercenary.dat'), 'r')
             for l in listMercenaries:
                 HexMercenary[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listMercenaries.close()
 
-            listCards = open(os.path.join('.','HexLists','HexList-AllCards.dat'), 'r')
+            listCards = open(os.path.join('.', 'HexLists', 'HexList-AllCards.dat'), 'r')
             for l in listCards:
                 HexCards[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listCards.close()
