@@ -14,7 +14,7 @@ import xml.etree.ElementTree
 #HTML parsing
 from lxml import html
 
-import scraper, config, decklist
+import scraper, config, decklist, globals
 from globals import Card, specmana
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
@@ -25,7 +25,7 @@ def GenerateCMC(name, cost):
     cmc = Image.new('RGBA',(16 * len(cost), 16))
     diskcost = cost.strip().replace('*', '_').replace('/', '-')
     # lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
-    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
+    lookupCMC = os.path.join(globals.CMC_PATH, '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
         if tap0.mode != 'RGBA':
@@ -37,7 +37,7 @@ def GenerateCMC(name, cost):
                 adjustcmc = True
     else:
         greaterthan9 = False
-        for n in range(len(cost) - 1):
+        for n in range(len(cost)):
             #reset the large mana cost markers
             if greaterthan9:
                 greaterthan9 = False
@@ -100,17 +100,15 @@ def draw_hex_card(name, guid, quantity, nstep):
 
     deck.paste(cut, (50,35*nstep))
 
-def draw_mtg_card(name, expansion, quantity, cost, nstep):
-    if name.find(" // ") != -1:
-        namesplit = name.replace(" // ", "/")
-        lookupScan = scraper.download_scan(namesplit, expansion)
+def draw_mtg_card(card, nstep):
+    if card.name.find(" // ") != -1:
+        namesplit = card.name.replace(" // ", "/")
+        lookupScan = scraper.download_scan(namesplit, card.set)
     else:
-        lookupScan = scraper.download_scan(name, expansion)
-
-    #    print name, lookupScan
+        lookupScan = scraper.download_scan(card.name, card.set)
 
     img = Image.open(lookupScan)
-    if name.find(" // ") != -1:
+    if card.name.find(" // ") != -1:
         img = img.rotate(-90)
 
     #check if im has Alpha band...
@@ -130,31 +128,28 @@ def draw_mtg_card(name, expansion, quantity, cost, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+    draw.text((6, 6), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
+    draw.text((8, 6), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
+    draw.text((6, 8), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
+    draw.text((8, 8), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
     #enter text
-    draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+    draw.text((7, 7), str(card.quantity)+'  '+card.name,(250,250,250), font=fnt)
 
-    cmc, adjustcmc = GenerateCMC(name, cost)
+    cmc, adjustcmc = GenerateCMC(card.name, card.cost)
 
     #place the cropped picture of the current card
     deck.paste(cut, (0, 34 * nstep))
 
     #adjust cmc size to reflex manacost greater than 9
     if adjustcmc:
-        deck.paste(cmc, (280-15*(len(cost)-1),8+34*nstep), mask=cmc)
+        deck.paste(cmc, (280-15*len(card.cost),8+34*nstep), mask=cmc)
         adjustcmc = False
     else:
-        deck.paste(cmc, (280-15*len(cost),8+34*nstep), mask=cmc)
+        deck.paste(cmc, (280-15*(len(card.cost)+1),8+34*nstep), mask=cmc)
 
 nstep = 1
 
-if not os.path.exists('./Scans'):
-    os.mkdir('./Scans')
-if not os.path.exists('./CmcCache'):
-    os.mkdir('./CmcCache')
+globals.mkcachepaths()
 
 #some position initialization
 xtop = 8
@@ -284,21 +279,21 @@ if deck_list.game == decklist.MTG:
         for card in deck_list.mainboard:
             #this step checks whether a specific art is requested by the user - provided via the set name
 
-            if card.cost == "*\n":
+            if card.cost == "*":
                 lands.append(card)
                 continue
-            draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
+            draw_mtg_card(card, nstep)
             nstep = nstep + 1
 
         for card in lands:
-            draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
+            draw_mtg_card(card, nstep)
             nstep = nstep + 1
 
         if doSideboard:
             deck.paste(sideboard, (0,34*nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
-                draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
+                draw_mtg_card(card, nstep)
                 nstep = nstep + 1
 
 elif deck_list.game == decklist.POKEMON:
