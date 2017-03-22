@@ -91,12 +91,12 @@ def draw_hex_card(name, guid, quantity, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
-    draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
-    draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
-    draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=hexfnt)
+    draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+    draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
+    draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+    draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
     #enter text
-    draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=hexfnt)
+    draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
 
     deck.paste(cut, (50,35*nstep))
 
@@ -167,18 +167,6 @@ xbotPKMN = 237
 ytopPKMN = 11.5
 ybotPKMN = 45.25
 
-#load the MTG text fonts
-fnt = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 14)
-fnt_title = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 18)
-
-#load the PKMN text fonts
-pokefnt = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 10)
-
-pokefnt_title = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
-
-hexfnt = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 14)
-hexfnt_title = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 16)
-
 # create a horizontal gradient...
 Hexgradient = Image.new('L', (1,255))
 
@@ -229,14 +217,20 @@ print(repr(deck_list))
 
 # create a header with the deck's name
 if deck_list.game == decklist.MTG:
+    fnt = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 14)
+    fnt_title = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 18)
     title = Image.new("RGB", (280, 34), "black")
     drawtitle = ImageDraw.Draw(title)
     drawtitle.text((10, 7), os.path.basename(str(sys.argv[1]))[0:-4], (250, 250, 250), font=fnt_title)
 elif deck_list.game == decklist.POKEMON:
+    fnt = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 10)
+    fnt_title = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
     title = Image.new("RGB", (219, 35), "black")
     drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=pokefnt_title)
+    drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=fnt_title)
 elif deck_list.game == decklist.HEX:
+    fnt = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 14)
+    fnt_title = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 16)
     title = Image.new("RGB", (320,34), "black")
     nametitle = str(sys.argv[1])[0:-4]
     nshard = 0
@@ -248,7 +242,7 @@ elif deck_list.game == decklist.HEX:
             title.paste(newshard,(10+nshard*20,7))
             nshard = nshard + 1
     drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=hexfnt_title)
+    drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
 
 ncountMB = len(deck_list.mainboard)
 ncountSB = len(deck_list.sideboard)
@@ -285,17 +279,13 @@ deck.paste(title, (0,0))
 
 #now read the decklist
 if deck_list.game == decklist.MTG:
-        lands = {}
+        lands = []
 
         for card in deck_list.mainboard:
             #this step checks whether a specific art is requested by the user - provided via the set name
-            quantity = deck_list.mainboard[card]
-            card = scraper.get_card_info(card, quantity)
-            if card is None:
-                continue
 
             if card.cost == "*\n":
-                lands[card] = quantity
+                lands.append(card)
                 continue
             draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
             nstep = nstep + 1
@@ -308,16 +298,11 @@ if deck_list.game == decklist.MTG:
             deck.paste(sideboard, (0,34*nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
-                quantity = deck_list.sideboard[card]
-                card = scraper.get_card_info(card, quantity)
-                if card is None:
-                    continue
                 draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
                 nstep = nstep + 1
 
 elif deck_list.game == decklist.POKEMON:
     for card in deck_list.mainboard:
-            card = deck_list.mainboard[card]
             quantity = card.quantity
             lookupScan, displayname = scraper.download_scanPKMN(card.name, card.set, card.collector_num)
             
@@ -341,12 +326,12 @@ elif deck_list.game == decklist.POKEMON:
 
             draw = ImageDraw.Draw(cut)
             #create text outline
-            draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
-            draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
-            draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
-            draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=pokefnt)
+            draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+            draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+            draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+            draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
             #enter text
-            draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=pokefnt)
+            draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=fnt)
 
             #place the cropped picture of the current card
             deck.paste(cut, (0, 35 * nstep))
@@ -356,13 +341,14 @@ elif deck_list.game == decklist.POKEMON:
 elif deck_list.game == decklist.HEX:
     banner = Image.new("RGB", (deckheight-35, 50), "black")
     if len(deck_list.commander) > 0:
-        cmdr, guid = deck_list.commander.keys()[0].split(' / ')
-        typeCM = deck_list.commander.values()[0]
+        cmdr = deck_list.commander[0]
+        guid = cmdr.collector_num
+        typeCM = cmdr.set
 
         drawbanner = ImageDraw.Draw(banner)
-        drawbanner.text((15,15), str(cmdr), (250,250,250), font=hexfnt_title)
+        drawbanner.text((15,15), str(cmdr.name), (250,250,250), font=fnt_title)
 
-        lookupScan = scraper.download_scanHexCM(cmdr, guid, typeCM)
+        lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
 
         mainguyImg = Image.open(lookupScan)
         mainguycut = mainguyImg.crop((135,55,185,275))
@@ -384,20 +370,14 @@ elif deck_list.game == decklist.HEX:
         deck.paste(banner, (0,35))
 
     for card in deck_list.mainboard:
-        name, guid = card.split(' / ')
-        quantity = deck_list.mainboard[card]
-
-        draw_hex_card(name, guid, quantity, nstep)
+        draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
         nstep = nstep + 1
 
     if doSideboard:
         deck.paste(sideboard, (50,35*nstep))
         nstep = nstep + 1
         for card in deck_list.sideboard:
-            name, guid = card.split(' / ')
-            quantity = deck_list.sideboard[card]
-
-            draw_hex_card(name, guid, quantity, nstep)
+            draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
             nstep = nstep + 1
             
 if deck_list.game == decklist.MTG:
