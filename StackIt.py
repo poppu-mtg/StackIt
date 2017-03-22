@@ -279,17 +279,13 @@ deck.paste(title, (0,0))
 
 #now read the decklist
 if deck_list.game == decklist.MTG:
-        lands = {}
+        lands = []
 
         for card in deck_list.mainboard:
             #this step checks whether a specific art is requested by the user - provided via the set name
-            quantity = deck_list.mainboard[card]
-            card = scraper.get_card_info(card, quantity)
-            if card is None:
-                continue
 
             if card.cost == "*\n":
-                lands[card] = quantity
+                lands.append(card)
                 continue
             draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
             nstep = nstep + 1
@@ -302,16 +298,11 @@ if deck_list.game == decklist.MTG:
             deck.paste(sideboard, (0,34*nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
-                quantity = deck_list.sideboard[card]
-                card = scraper.get_card_info(card, quantity)
-                if card is None:
-                    continue
                 draw_mtg_card(card.name, card.set, card.quantity, card.cost, nstep)
                 nstep = nstep + 1
 
 elif deck_list.game == decklist.POKEMON:
     for card in deck_list.mainboard:
-            card = deck_list.mainboard[card]
             quantity = card.quantity
             lookupScan, displayname = scraper.download_scanPKMN(card.name, card.set, card.collector_num)
             
@@ -350,13 +341,14 @@ elif deck_list.game == decklist.POKEMON:
 elif deck_list.game == decklist.HEX:
     banner = Image.new("RGB", (deckheight-35, 50), "black")
     if len(deck_list.commander) > 0:
-        cmdr, guid = deck_list.commander.keys()[0].split(' / ')
-        typeCM = deck_list.commander.values()[0]
+        cmdr = deck_list.commander[0]
+        guid = cmdr.collector_num
+        typeCM = cmdr.set
 
         drawbanner = ImageDraw.Draw(banner)
-        drawbanner.text((15,15), str(cmdr), (250,250,250), font=fnt_title)
+        drawbanner.text((15,15), str(cmdr.name), (250,250,250), font=fnt_title)
 
-        lookupScan = scraper.download_scanHexCM(cmdr, guid, typeCM)
+        lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
 
         mainguyImg = Image.open(lookupScan)
         mainguycut = mainguyImg.crop((135,55,185,275))
@@ -378,20 +370,14 @@ elif deck_list.game == decklist.HEX:
         deck.paste(banner, (0,35))
 
     for card in deck_list.mainboard:
-        name, guid = card.split(' / ')
-        quantity = deck_list.mainboard[card]
-
-        draw_hex_card(name, guid, quantity, nstep)
+        draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
         nstep = nstep + 1
 
     if doSideboard:
         deck.paste(sideboard, (50,35*nstep))
         nstep = nstep + 1
         for card in deck_list.sideboard:
-            name, guid = card.split(' / ')
-            quantity = deck_list.sideboard[card]
-
-            draw_hex_card(name, guid, quantity, nstep)
+            draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
             nstep = nstep + 1
             
 if deck_list.game == decklist.MTG:

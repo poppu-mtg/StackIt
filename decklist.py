@@ -21,9 +21,9 @@ def parse_list(decklist):
     ncount = 0
     isSideboard = False
 
-    mainboard = {}
-    sideboard = {}
-    commander = {}
+    mainboard = []
+    sideboard = []
+    commander = []
 
     isDeckXML = mmap.mmap(decklist.fileno(), 0, access=mmap.ACCESS_READ)
     if isDeckXML.find('xml') != -1:
@@ -70,11 +70,9 @@ def parse_list(decklist):
             data = line.split(':')
             cmdr = data[1].strip()
             if data[0].lower() == 'champion':
-                key = '{name} / {guid}'.format(name=cmdr, guid=HexChampion[cmdr])
-                commander[key] = 'C'
+                commander.append(Card(name=cmdr, quantity=1, collector_num=HexChampion[cmdr], set="C", cost=None))
             else:
-                key = '{name} / {guid}'.format(name=cmdr, guid=HexMercenary[cmdr])
-                commander[key] = 'M'
+                commander.append(Card(name=cmdr, quantity=1, collector_num=HexMercenary[cmdr], set="M", cost=None))
             continue
 
         if game == HEX:
@@ -88,22 +86,22 @@ def parse_list(decklist):
                 data = line.split('x ', 1)
                 quantity = data[0]
                 name = data[1].strip()
-                namescan = HexCards[name]
-                key = '{name} / {guid}'.format(name=name, guid=namescan)
+                guid = HexCards[name]
+                card = Card(name=name, quantity=quantity, collector_num=guid, set=None, cost=None)
                 if isSideboard:
-                    sideboard[key] = quantity
+                    sideboard.append(card)
                 else:
-                    mainboard[key] = quantity
+                    mainboard.append(card)
         elif game == MTG:
             quantity, name = line.split(' ', 1)
+            card = scraper.get_card_info(name, quantity)
             if isSideboard:
-                sideboard[name] = quantity
+                sideboard.append(card)
             else:
-                mainboard[name] = quantity
+                mainboard.append(card)
         elif game == POKEMON:
             if line[0].isdigit():
                 data = line.split(' ')
-                print(data)
 
                 quantity = data[0]
                 set = data[-2]
@@ -112,7 +110,7 @@ def parse_list(decklist):
 
                 for item in data[2:-2]:
                     name += item + ' '
-                mainboard[name] = Card(name=name, set=set, quantity=quantity, collector_num=setID, cost=None)
+                mainboard.append(Card(name=name, set=set, quantity=quantity, collector_num=setID, cost=None))
 
         ncount = ncount + 1
 
