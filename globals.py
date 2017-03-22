@@ -1,4 +1,4 @@
-import collections
+import collections, os
 
 # Named Tuple that defines the attribues of a card.
 Card = collections.namedtuple('Card', ['name', 'set', 'cost', 'quantity', 'collector_num'])
@@ -14,4 +14,15 @@ specmana = {
     '2/W': 'Y', '2/U': 'Z', '2/B': '@', '2/R': 'A', '2/G': 'D', 
     'W/U': 'E', 'U/B': 'F', 'B/R': 'H', 'R/G': 'I', 'G/W': 'J', 'W/B': 'K', 'U/R': 'L', 'B/G': 'M', 'R/W': 'N', 'G/U': 'O'
     }
+
+SCAN_PATH = os.path.join('.', 'cache', 'Scans')
+CMC_PATH = os.path.join('.', 'cache', 'manacosts')
+
+def mkcachepaths():
+    if not os.path.exists('./cache'):
+        os.mkdir('./cache')
+    if not os.path.exists(SCAN_PATH):
+        os.mkdir(SCAN_PATH)
+    if not os.path.exists(CMC_PATH):
+        os.mkdir(CMC_PATH)
 

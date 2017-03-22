@@ -14,7 +14,7 @@ import xml.etree.ElementTree
 #HTML parsing
 from lxml import html
 
-import scraper, config, decklist
+import scraper, config, decklist, globals
 from globals import Card, specmana
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
@@ -25,7 +25,7 @@ def GenerateCMC(name, cost):
     cmc = Image.new('RGBA',(16 * len(cost), 16))
     diskcost = cost.strip().replace('*', '_').replace('/', '-')
     # lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
-    lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
+    lookupCMC = os.path.join(globals.CMC_PATH, '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
         if tap0.mode != 'RGBA':
@@ -37,7 +37,7 @@ def GenerateCMC(name, cost):
                 adjustcmc = True
     else:
         greaterthan9 = False
-        for n in range(len(cost) - 1):
+        for n in range(len(cost)):
             #reset the large mana cost markers
             if greaterthan9:
                 greaterthan9 = False
@@ -149,10 +149,7 @@ def draw_mtg_card(card, nstep):
 
 nstep = 1
 
-if not os.path.exists('./Scans'):
-    os.mkdir('./Scans')
-if not os.path.exists('./CmcCache'):
-    os.mkdir('./CmcCache')
+globals.mkcachepaths()
 
 #some position initialization
 xtop = 8

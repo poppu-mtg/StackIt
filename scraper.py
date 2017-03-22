@@ -6,7 +6,7 @@ from builtins import str
 from builtins import range
 import os, urllib.request, urllib.parse, urllib.error, json
 import requests
-import config
+import config, globals
 
 #needed to remove the accent in 'Pokemon'
 import unicodedata
@@ -17,10 +17,12 @@ from globals import Card, specmana
 def download_scan(name, expansion):
     expansion = expansion.lower()
     if expansion == 'mps':
+        # This is the only place I know where mtgjson and magiccards.info differ on set codes. 
         expansion = 'mpskld'
+
     name2 = ''.join(e for e in name if e.isalnum())
     localname = name2+'_'+expansion+'.jpg'
-    lookupScan = os.path.join('.', 'Scans', localname)
+    lookupScan = os.path.join(globals.SCAN_PATH, localname)
     if os.path.exists(lookupScan):
         return lookupScan
 
@@ -59,7 +61,7 @@ def download_scanPKMN(name, expansion, expID):
 
     localname = 'PKMN-{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
 
-    lookupScan = os.path.join('.', 'Scans', localname)
+    lookupScan = os.path.join(globals.SCAN_PATH, localname)
 
     if os.path.exists(lookupScan):
         return lookupScan, displayname
@@ -92,7 +94,7 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
 def download_scanHex(name, namescan):
     name2 = ''.join(e for e in name if e.isalnum())
     localname = 'HexTCG-'+name2+'.jpg'
-    lookupScan = os.path.join('.', 'Scans', localname)
+    lookupScan = os.path.join(globals.SCAN_PATH, localname)
 
     if os.path.exists(lookupScan):
         return lookupScan
@@ -173,7 +175,7 @@ def get_card_info(line, quantity=None):
         #all basic lands will be using Unhinged card art
         if expansion is None:
             expansion = "uh"
-        number=None
+        number = None
         manacost = "*"
     return Card(name, expansion, manacost, quantity, collector_num=number)
 

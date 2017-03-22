@@ -1,6 +1,7 @@
+cache/
 Scans/
-*.pyc
 CmcCache/
+*.pyc
 settings.yml
 .vscode/
 testdecks/*.png
