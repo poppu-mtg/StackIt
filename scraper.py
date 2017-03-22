@@ -4,7 +4,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import str
 from builtins import range
-import os, urllib.request, urllib.parse, urllib.error
+import os, urllib.request, urllib.parse, urllib.error, json
 import requests
 import config
 
@@ -15,6 +15,9 @@ from lxml import html
 from globals import Card, specmana
 
 def download_scan(name, expansion):
+    expansion = expansion.lower()
+    if expansion == 'mps':
+        expansion = 'mpskld'
     name2 = ''.join(e for e in name if e.isalnum())
     localname = name2+'_'+expansion+'.jpg'
     lookupScan = os.path.join('.', 'Scans', localname)
@@ -29,7 +32,7 @@ def download_scan(name, expansion):
         name = name.split('/')[0]+' ('+name+')'
 
     scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
-    # print(scannumber)
+    print(scannumber)
     cardloc = None
     for item in scannumber:
         if item.find("/en/"):
@@ -41,9 +44,11 @@ def download_scan(name, expansion):
         # print(cardloc)
         pass
 
-    url = 'http://magiccards.info/scans/en/'+cardloc[1]+'/'+cardloc[3]+'jpg'
-    urllib.request.urlretrieve(url, cardloc[3]+'jpg')
-    os.rename(cardloc[3] + 'jpg', lookupScan)
+    expansion = cardloc[1]
+    number = cardloc[3].strip('.')
+    url = 'http://magiccards.info/scans/en/'+expansion+'/'+number+'.jpg'
+    urllib.request.urlretrieve(url, number+'.jpg')
+    os.rename(number + '.jpg', lookupScan)
 
     return lookupScan
 
@@ -141,89 +146,60 @@ def get_card_info(line, quantity=None):
 
     if not isitland:
 
-        #update the cardname as the string to be looked at in the html code of mtgvault.com - finds both CMC and set name
-        name_sub = name.replace(",", "")
-        name_sub = name_sub.replace("'", " ")
-        # print(name_sub)
+        expansion, manacost, typeline, number = get_json(name, expansion)
 
-        cmcsearch = name_sub.replace(" ", "+")
-        scansearch = name_sub.replace(" s ", "s ")
-#        scansearch = scansearch.replace(" ","-")
-        if name_sub.find(' // ') != -1:
-            scansearch = scansearch.replace(" // ", '-')
-        else:
-            scansearch = scansearch.replace(" ", "-")
-        scansearch = scansearch.lower()
-        # print(cmcsearch, scansearch)
-
-        if expansion is None:
-            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name'.format(cmcsearch=cmcsearch)
-        else:
-            cmcweb = 'http://www.mtgvault.com/cards/search/?q={cmcsearch}&searchtype=name&s={set}'.format(cmcsearch=cmcsearch, set=expansion)
-
-        cmcpage = requests.get(cmcweb)
-        cmctree = html.fromstring(cmcpage.content)
-
-        scankey = "/card/" + scansearch + '/'
-
-        cmcscan = cmctree.xpath('//a[img[@class="card_image"]]/@href')
-        # print cmcscan
-        for item in cmcscan:
-            # print item,ncount_card
-            if scan_part1 != None:
-                continue
-            if item.find(scankey) == 0:
-                print("found it:", item)
-                scan_part1 = item.split(scankey)[1]
-            ncount_card = ncount_card + 1
-        altscan = str(scan_part1.split('/"')[0]).lower()
-
-        expansion = altscan[:-1]
-
-        cmctext = cmctree.xpath('//div[@class="view-card-center"]/p/text()')
-        # print(cmctext)
-
-        finallist = []
-        for item in cmctext:
-            if item[-1] == "}":
-                finallist.append(item)
-        # print(finallist)
-
-        if cmctext[0].find("Land") != -1:
-            altcmc = '*'
-        elif not '}' in cmctext[0]:
+        if typeline.find("Land") != -1:
+            manacost = '*'
+        elif manacost is None:
             # Lotus Bloom, Evermind, and other costless cards.
-            altcmc = '**'
+            manacost = '**'
         else:
-#                cmc_part1 = str(cmctext[0].split(" {")[1])[:-1]
-            if finallist[ncount_card-1].find(' // ') != -1:
-                splitcost = True
-                for item in finallist[0].split(' //'):
-                    altcmc_list.append(item.split(" {")[1][:-1].split("}{"))
-                    # print(name, altcmc_list[n_cost])
-                    n_cost += 1
-            else:
-                cmc_part1 = str(finallist[ncount_card-1].split(" {")[1])[:-1]
-                altcmc = cmc_part1.split("}{")
-                altcmc = [specmana[x] for x in altcmc]
-                # print(name, altcmc)
+            costs = manacost.split(' // ')
+            manacost = ''
+            for cost in costs:
+                cost = cost[1:-1]
+                cost = cost.split("}{")
+                cost = [specmana[x] for x in cost]
+                cost = ''.join(cost)
+                if manacost == '':
+                    manacost = cost
+                else:
+                    manacost = manacost + '/' + cost
 
-        cost = ''
-        if splitcost:
-            for n in range(n_cost):
-                cost += "".join(altcmc_list[n])+'/'
-            cost = cost[:-1]+"\n"
-        else:
-            cost = "".join(altcmc)+"\n"
-        print((name, expansion, cost))
+        print((name, expansion, manacost))
 
     else:
 
         #all basic lands will be using Unhinged card art
         if expansion is None:
             expansion = "uh"
-        cost = "*\n"
-    return Card(name, expansion, cost, quantity, collector_num=None)
+        number=None
+        manacost = "*"
+    return Card(name, expansion, manacost, quantity, collector_num=number)
+
+def get_json(cardname, expansion):
+    if ' // ' in cardname:
+        splitcard = True
+        cardname, altname = cardname.split(' // ')
+    else:
+        splitcard = False
+
+    js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
+    blob = json.loads(js.content)
+    card = blob['cards'][0]
+    mana_cost = card.get('manaCost', None)
+    typeline = card['type']
+    printings = card['printings']
+    number = card.get('number', None)
+    if not expansion in printings:
+        expansion = printings[-1]
+    if splitcard:
+        js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
+        blob = json.loads(js.content)
+        card = blob['cards'][0]
+        mana_cost = mana_cost + ' // ' + card.get('manaCost', None)
+    # print((cardname, expansion, mana_cost, typeline))
+    return expansion, mana_cost, typeline, number
 
 def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
