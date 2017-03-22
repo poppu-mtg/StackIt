@@ -56,7 +56,7 @@ def GenerateCMC(name, cost):
                 tap = tap0.resize((16, 16))
                 cmc.paste(tap, (15 * n, 0), mask=tap)
             else:
-                if (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
+                if (len(cost) > n + 1) and (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
                     finalcost = cost[n]+cost[n+1]
                     greaterthan9 = True
                 else:
