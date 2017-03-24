@@ -193,7 +193,7 @@ def get_json(cardname, expansion):
     typeline = card['type']
     printings = card['printings']
     number = card.get('number', None)
-    if not expansion in printings:
+    if not str(expansion).upper() in printings:
         #grabbing the last item relies on MCI having those scans already
         if printings[-1] in mtgreprints: #check if reprint set
             if printings[-2].find('DD') != -1: #filter out Duel Decks too
