@@ -196,7 +196,10 @@ def get_json(cardname, expansion):
     if not expansion in printings:
         #grabbing the last item relies on MCI having those scans already
         if printings[-1] in mtgreprints: #check if reprint set
-            expansion = printings[-2]
+            if printings[-2].find('DD') != -1: #filter out Duel Decks too
+                expansion = printings[-3]
+            else:
+                expansion = printings[-2]
         else:
             expansion = printings[-1]
     if splitcard:
