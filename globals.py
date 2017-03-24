@@ -15,6 +15,9 @@ specmana = {
     'W/U': 'E', 'U/B': 'F', 'B/R': 'H', 'R/G': 'I', 'G/W': 'J', 'W/B': 'K', 'U/R': 'L', 'B/G': 'M', 'R/W': 'N', 'G/U': 'O'
     }
 
+#create a list of reprint sets:
+mtgreprints = ['MMA','MM2','MM3','EMA','TPR','CHR','MD1']
+
 SCAN_PATH = os.path.join('.', 'cache', 'Scans')
 CMC_PATH = os.path.join('.', 'cache', 'manacosts')
 

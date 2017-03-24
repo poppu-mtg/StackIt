@@ -12,7 +12,7 @@ import config, globals
 import unicodedata
 
 from lxml import html
-from globals import Card, specmana
+from globals import Card, specmana, mtgreprints
 
 def download_scan(name, expansion):
     expansion = expansion.lower()
@@ -194,7 +194,11 @@ def get_json(cardname, expansion):
     printings = card['printings']
     number = card.get('number', None)
     if not expansion in printings:
-        expansion = printings[-1]
+        #grabbing the last item relies on MCI having those scans already
+        if printings[-1] in mtgreprints: #check if reprint set
+            expansion = printings[-2]
+        else:
+            expansion = printings[-1]
     if splitcard:
         js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
         blob = json.loads(js.content)
