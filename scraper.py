@@ -175,9 +175,11 @@ def get_card_info(line, quantity=None):
     return Card(name, expansion, manacost, quantity, collector_num=number)
 
 def get_json(cardname, expansion):
+    fullname = cardname
     if ' // ' in cardname:
         splitcard = True
         cardname, altname = cardname.split(' // ')
+        fullname = '{0}/{1}'.format(cardname, altname)
     else:
         splitcard = False
 
@@ -191,7 +193,7 @@ def get_json(cardname, expansion):
     if not str(expansion).upper() in printings:
         #grabbing the last item relies on MCI having those scans already
         for printing in printings:
-            if download_scan(cardname, printing) is not None:
+            if download_scan(fullname, printing) is not None:
                 expansion = printing
                 break
 
