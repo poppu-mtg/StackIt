@@ -3,7 +3,7 @@ import globals
 
 SETTINGS = dict()
 
-if not os.path.exists(os.path.join(globals.globaldir), 'settings.yml'):
+if not os.path.exists(os.path.join(globals.globaldir, 'settings.yml')):
     with open('settings.yml', 'w') as f:
         f.write("""
 cards:

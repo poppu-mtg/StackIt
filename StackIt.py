@@ -224,8 +224,8 @@ elif deck_list.game == decklist.POKEMON:
     drawtitle = ImageDraw.Draw(title)
     drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=fnt_title)
 elif deck_list.game == decklist.HEX:
-    fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Agane-55-roman.ttf'), 14)
-    fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Agane-55-roman.ttf'), 16)
+    fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 16)
+    fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 18)
     title = Image.new("RGB", (320,34), "black")
     nametitle = str(sys.argv[1])[0:-4]
     nshard = 0

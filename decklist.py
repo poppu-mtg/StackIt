@@ -52,17 +52,17 @@ def parse_list(decklist):
             HexChampion = {}
             HexMercenary = {}
             HexCards = {}
-            listChampions = open(os.path.join(globals.localdir, 'HexLists', 'HexList-Champion.dat'), 'r')
+            listChampions = open(os.path.join(globals.localdir, 'resources', 'HexLists', 'HexList-Champion.dat'), 'r')
             for l in listChampions:
                 HexChampion[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listChampions.close()
 
-            listMercenaries = open(os.path.join('.', 'HexLists', 'HexList-Mercenary.dat'), 'r')
+            listMercenaries = open(os.path.join(globals.localdir, 'resources', 'HexLists', 'HexList-Mercenary.dat'), 'r')
             for l in listMercenaries:
                 HexMercenary[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listMercenaries.close()
 
-            listCards = open(os.path.join('.', 'HexLists', 'HexList-AllCards.dat'), 'r')
+            listCards = open(os.path.join(globals.localdir, 'resources', 'HexLists', 'HexList-AllCards.dat'), 'r')
             for l in listCards:
                 HexCards[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listCards.close()

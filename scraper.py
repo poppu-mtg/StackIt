@@ -71,7 +71,7 @@ def download_scanPKMN(name, expansion, expID):
 def download_scanHexCM(mainguy, mainguyscan, typeCM):
     mainguy2 = ''.join(e for e in mainguy if e.isalnum())
     localname = 'HexTCG-'+mainguy2+'_'+typeCM+'.jpg'
-    lookupScan = os.path.join('.', 'Scans', localname)
+    lookupScan = os.path.join(globals.SCAN_PATH, localname)
 
     if os.path.exists(lookupScan):
         return lookupScan
