@@ -1,4 +1,4 @@
-import collections, os
+import collections, os, sys
 
 # Named Tuple that defines the attribues of a card.
 Card = collections.namedtuple('Card', ['name', 'set', 'cost', 'quantity', 'collector_num'])
@@ -18,12 +18,24 @@ specmana = {
 #create a list of reprint sets:
 mtgreprints = ['MMA','MM2','MM3','EMA','TPR','CHR','MD1']
 
-SCAN_PATH = os.path.join('.', 'cache', 'Scans')
-CMC_PATH = os.path.join('.', 'cache', 'manacosts')
+# pyinstaller
+if getattr(sys, 'frozen', False):
+    print('Using Bundled Python')
+    localdir = sys._MEIPASS
+    globaldir = os.path.dirname(sys.executable)
+else:
+    localdir = sys.path[0]
+    globaldir = sys.path[0]
+
+
+# print("DIR={0}".format(localdir))
+
+SCAN_PATH = os.path.join(globaldir, 'cache', 'Scans')
+CMC_PATH = os.path.join(globaldir, 'cache', 'manacosts')
 
 def mkcachepaths():
-    if not os.path.exists('./cache'):
-        os.mkdir('./cache')
+    if not os.path.exists(os.path.join(globaldir, 'cache')):
+        os.mkdir(os.path.join(globaldir, 'cache'))
     if not os.path.exists(SCAN_PATH):
         os.mkdir(SCAN_PATH)
     if not os.path.exists(CMC_PATH):
