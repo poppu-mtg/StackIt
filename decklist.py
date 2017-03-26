@@ -8,7 +8,7 @@ import xml.etree.ElementTree
 from lxml import html
 import requests
 
-import scraper, config
+import scraper, config, globals
 from globals import Card, List
 
 MTG = 1
@@ -52,7 +52,7 @@ def parse_list(decklist):
             HexChampion = {}
             HexMercenary = {}
             HexCards = {}
-            listChampions = open(os.path.join('.', 'HexLists', 'HexList-Champion.dat'), 'r')
+            listChampions = open(os.path.join(globals.localdir, 'HexLists', 'HexList-Champion.dat'), 'r')
             for l in listChampions:
                 HexChampion[l.split('.jpg')[1].strip()] = l.split('.jpg ')[0]
             listChampions.close()

@@ -35,7 +35,8 @@ def download_scan(name, expansion):
 #            cardloc = scannumber[0][:-4].split("/")
             cardloc = item[:-4].split("/")
     if cardloc is None:
-        print('ERROR - Could not find {0} ({1})'.format(name, expansion))
+        print('WARNING - Could not find {0} ({1})'.format(name, expansion))
+        return None
     else:
         # print(cardloc)
         pass
@@ -189,13 +190,11 @@ def get_json(cardname, expansion):
     number = card.get('number', None)
     if not str(expansion).upper() in printings:
         #grabbing the last item relies on MCI having those scans already
-        if printings[-1] in mtgreprints: #check if reprint set
-            if printings[-2].find('DD') != -1: #filter out Duel Decks too
-                expansion = printings[-3]
-            else:
-                expansion = printings[-2]
-        else:
-            expansion = printings[-1]
+        for printing in printings:
+            if download_scan(cardname, printing) is not None:
+                expansion = printing
+                break
+
     if splitcard:
         js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
         blob = json.loads(js.text)
