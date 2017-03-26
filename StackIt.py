@@ -48,7 +48,7 @@ def GenerateCMC(name, cost):
                 continue
             #add correct treatment of separation for split cards
             elif cost[n] == '/':
-                symbol = 'Mana/Mana_spn.png'
+                symbol = os.path.join('resources', 'mana', 'Mana_spn.png')
                 tap0 = Image.open(symbol)
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
@@ -61,7 +61,7 @@ def GenerateCMC(name, cost):
                     greaterthan9 = True
                 else:
                     finalcost = cost[n]
-                symbol = 'Mana/Mana_'+finalcost+'.png'
+                symbol = os.path.join('resources', 'mana', 'Mana_'+finalcost+'.png')
 
                 tap0 = Image.open(symbol)
                 if tap0.mode != 'RGBA':
@@ -212,20 +212,20 @@ print(repr(deck_list))
 
 # create a header with the deck's name
 if deck_list.game == decklist.MTG:
-    fnt = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 14)
-    fnt_title = ImageFont.truetype("beleren-webfonts/belerensmallcaps-bold-webfont.ttf", 18)
+    fnt = ImageFont.truetype("resources/fonts/belerensmallcaps-bold-webfont.ttf", 14)
+    fnt_title = ImageFont.truetype("resources/fonts/belerensmallcaps-bold-webfont.ttf", 18)
     title = Image.new("RGB", (280, 34), "black")
     drawtitle = ImageDraw.Draw(title)
     drawtitle.text((10, 7), os.path.basename(str(sys.argv[1]))[0:-4], (250, 250, 250), font=fnt_title)
 elif deck_list.game == decklist.POKEMON:
-    fnt = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 10)
-    fnt_title = ImageFont.truetype("humanist-webfonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
+    fnt = ImageFont.truetype("resources/fonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 10)
+    fnt_title = ImageFont.truetype("resources/fonts/ufonts.com_humanist521bt-ultrabold-opentype.otf", 14)
     title = Image.new("RGB", (219, 35), "black")
     drawtitle = ImageDraw.Draw(title)
     drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=fnt_title)
 elif deck_list.game == decklist.HEX:
-    fnt = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 14)
-    fnt_title = ImageFont.truetype("agane-webfonts/Agane-55-roman.ttf", 16)
+    fnt = ImageFont.truetype("resources/fonts/Agane-55-roman.ttf", 14)
+    fnt_title = ImageFont.truetype("resources/fonts/Agane-55-roman.ttf", 16)
     title = Image.new("RGB", (320,34), "black")
     nametitle = str(sys.argv[1])[0:-4]
     nshard = 0
@@ -233,7 +233,7 @@ elif deck_list.game == decklist.HEX:
         #print nametitle,nshard
         if nametitle.find(shard) != -1:
             nametitle = nametitle.replace(shard,'')
-            newshard = Image.open(os.path.join('.','Mana',shard+'.png')).resize((20,20))
+            newshard = Image.open(os.path.join('resources', 'mana',shard+'.png')).resize((20,20))
             title.paste(newshard,(10+nshard*20,7))
             nshard = nshard + 1
     drawtitle = ImageDraw.Draw(title)

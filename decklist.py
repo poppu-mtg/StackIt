@@ -26,7 +26,7 @@ def parse_list(decklist):
     commander = []
 
     isDeckXML = mmap.mmap(decklist.fileno(), 0, access=mmap.ACCESS_READ)
-    if isDeckXML.find('xml') != -1:
+    if isDeckXML.find(b'xml') != -1:
         print('decklist is in MTGO XML format')
         decklist = preprocess_xml(decklist)
 
@@ -135,9 +135,9 @@ def preprocess_xml(decklist):
                 mainboard[atype.get('Name')] = int(atype.get('Quantity'))
 
     decklist = []
-    for card in mainboard.keys():
+    for card in list(mainboard.keys()):
         decklist.append('{n} {c}'.format(n=mainboard[card], c=card.replace(' / ', ' // ')))
     decklist.append('')
-    for card in sideboard.keys():
+    for card in list(sideboard.keys()):
         decklist.append('{n} {c}'.format(n=sideboard[card], c=card.replace(' / ', ' // ')))
     return decklist

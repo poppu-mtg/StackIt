@@ -6,3 +6,5 @@ settings.yml
 .vscode/
 testdecks/*.png
 !testdecks/StressTest1.png
+dist/
+build/

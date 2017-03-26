@@ -1,10 +1,4 @@
-# coding=utf-8
-from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import range
-import os, urllib.request, urllib.parse, urllib.error, json
+import os, json
 import requests
 import config, globals
 
@@ -49,7 +43,7 @@ def download_scan(name, expansion):
     expansion = cardloc[1]
     number = cardloc[3].strip('.')
     url = 'http://magiccards.info/scans/en/'+expansion+'/'+number+'.jpg'
-    urllib.request.urlretrieve(url, number+'.jpg')
+    store(url, number+'.jpg')
     os.rename(number + '.jpg', lookupScan)
 
     return lookupScan
@@ -68,7 +62,7 @@ def download_scanPKMN(name, expansion, expID):
 
     pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
     print(pokeurl)
-    urllib.request.urlretrieve(pokeurl, localname)
+    store(pokeurl, localname)
     os.rename(localname, lookupScan)
 
     return lookupScan, displayname
@@ -86,7 +80,7 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
     else:
         url = 'https://storage.hex.tcgbrowser.com/big/'+mainguyscan+'.jpg'
         #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
-    urllib.urlretrieve(url, localname)
+    store(url, localname)
     os.rename(localname, lookupScan)
 
     return lookupScan
@@ -101,7 +95,7 @@ def download_scanHex(name, namescan):
 
     url = 'https://storage.hex.tcgbrowser.com/big/'+namescan+'.jpg'
     #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
-    urllib.urlretrieve(url, localname)
+    store(url, localname)
     os.rename(localname, lookupScan)
 
     return lookupScan
@@ -187,7 +181,7 @@ def get_json(cardname, expansion):
         splitcard = False
 
     js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
-    blob = json.loads(js.content)
+    blob = json.loads(js.text)
     card = blob['cards'][0]
     mana_cost = card.get('manaCost', None)
     typeline = card['type']
@@ -204,7 +198,7 @@ def get_json(cardname, expansion):
             expansion = printings[-1]
     if splitcard:
         js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
-        blob = json.loads(js.content)
+        blob = json.loads(js.text)
         card = blob['cards'][0]
         mana_cost = mana_cost + ' // ' + card.get('manaCost', None)
     # print((cardname, expansion, mana_cost, typeline))
@@ -214,3 +208,9 @@ def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
     text = text.encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
     return text
+
+def store(url, filename):
+    r = requests.get(url, stream=True)
+    with open(filename, 'wb') as f:
+        for chunk in r.iter_content(1024):
+            f.write(chunk)
