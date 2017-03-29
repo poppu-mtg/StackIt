@@ -147,8 +147,6 @@ def draw_mtg_card(card, nstep):
     else:
         deck.paste(cmc, (280-15*(len(card.cost)+1),8+34*nstep), mask=cmc)
 
-nstep = 1
-
 globals.mkcachepaths()
 
 #some position initialization
@@ -190,199 +188,199 @@ for x in range(64):
 for x in range(64):
     gradient.putpixel((190 + x, 0), 254)
 
-#check if we should include the sideboard
-if len(sys.argv) == 2:
+def main(filename):
+
+
     doSideboard = config.Get('options', 'display_sideboard')
-else:
-    if str(sys.argv[2]) in ['sb', 'sideboard']:
-        doSideboard = True
-    elif str(sys.argv[2]) in ['nosb']:
+
+    #open user input decklist
+    raw_decklist = open(str(filename), 'r')
+
+    deck_list = decklist.parse_list(raw_decklist)
+
+    raw_decklist.close()
+
+    print(repr(deck_list))
+
+    nstep = 1
+    # create a header with the deck's name
+    global fnt
+    if deck_list.game == decklist.MTG:
+        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 14)
+        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 18)
+        title = Image.new("RGB", (280, 34), "black")
+        drawtitle = ImageDraw.Draw(title)
+        drawtitle.text((10, 7), os.path.basename(str(filename))[0:-4], (250, 250, 250), font=fnt_title)
+    elif deck_list.game == decklist.POKEMON:
+        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 10)
+        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
+        title = Image.new("RGB", (219, 35), "black")
+        drawtitle = ImageDraw.Draw(title)
+        drawtitle.text((10, 8), os.path.basename(str(filename))[0:-4],(250, 250, 250), font=fnt_title)
+    elif deck_list.game == decklist.HEX:
+        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 16)
+        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 18)
+        title = Image.new("RGB", (320,34), "black")
+        nametitle = str(filename)[0:-4]
+        nshard = 0
+        for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
+            #print nametitle,nshard
+            if nametitle.find(shard) != -1:
+                nametitle = nametitle.replace(shard,'')
+                newshard = Image.open(os.path.join(globals.localdir, 'resources', 'mana',shard+'.png')).resize((20,20))
+                title.paste(newshard,(10+nshard*20,7))
+                nshard = nshard + 1
+        drawtitle = ImageDraw.Draw(title)
+        drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
+
+    ncountMB = len(deck_list.mainboard)
+    ncountSB = len(deck_list.sideboard)
+    ncount = ncountMB
+    if ncountSB == 0:
         doSideboard = False
-    else:
-        doSideboard = config.Get('options', 'display_sideboard')
+    if doSideboard:
+        #create a Sideboard partition
+        sideboard = Image.new("RGB", (280, 34), "black")
+        drawtitle = ImageDraw.Draw(sideboard)
+        sideboard_name = "Sideboard"
+        if deck_list.game == decklist.HEX:
+            sideboard_name = "Reserves"
+        drawtitle.text((10, 7), sideboard_name, (250, 250, 250), font=fnt_title)
+        ncount += ncountSB + 1
 
-#open user input decklist
-raw_decklist = open(str(sys.argv[1]), 'r')
+    #define the size of the canvas, incl. space for the title header
+    if deck_list.game == decklist.MTG:
+        deckwidth = 280
+        deckheight = 34*(ncount+1)
+    elif deck_list.game == decklist.POKEMON:
+        deckwidth = 219
+        deckheight = 35*(ncount+1)
+    elif deck_list.game == decklist.HEX:
+        deckwidth = 320
+        deckheight = 35*(ncount+1)
 
-deck_list = decklist.parse_list(raw_decklist)
+    #reset the sideboard marker
+    isSideboard = 0
+    
+    global deck
+    deck = Image.new("RGB", (deckwidth, deckheight), "white")
 
-raw_decklist.close()
+    deck.paste(title, (0,0))
 
-print(repr(deck_list))
+    #now read the decklist
+    if deck_list.game == decklist.MTG:
+            lands = []
 
-# create a header with the deck's name
-if deck_list.game == decklist.MTG:
-    fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 14)
-    fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 18)
-    title = Image.new("RGB", (280, 34), "black")
-    drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((10, 7), os.path.basename(str(sys.argv[1]))[0:-4], (250, 250, 250), font=fnt_title)
-elif deck_list.game == decklist.POKEMON:
-    fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 10)
-    fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
-    title = Image.new("RGB", (219, 35), "black")
-    drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((10, 8), os.path.basename(str(sys.argv[1]))[0:-4],(250, 250, 250), font=fnt_title)
-elif deck_list.game == decklist.HEX:
-    fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 16)
-    fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 18)
-    title = Image.new("RGB", (320,34), "black")
-    nametitle = str(sys.argv[1])[0:-4]
-    nshard = 0
-    for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
-        #print nametitle,nshard
-        if nametitle.find(shard) != -1:
-            nametitle = nametitle.replace(shard,'')
-            newshard = Image.open(os.path.join(globals.localdir, 'resources', 'mana',shard+'.png')).resize((20,20))
-            title.paste(newshard,(10+nshard*20,7))
-            nshard = nshard + 1
-    drawtitle = ImageDraw.Draw(title)
-    drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
+            for card in deck_list.mainboard:
+                #this step checks whether a specific art is requested by the user - provided via the set name
 
-ncountMB = len(deck_list.mainboard)
-ncountSB = len(deck_list.sideboard)
-ncount = ncountMB
-if ncountSB == 0:
-    doSideboard = False
-if doSideboard:
-    #create a Sideboard partition
-    sideboard = Image.new("RGB", (280, 34), "black")
-    drawtitle = ImageDraw.Draw(sideboard)
-    sideboard_name = "Sideboard"
-    if deck_list.game == decklist.HEX:
-        sideboard_name = "Reserves"
-    drawtitle.text((10, 7), sideboard_name, (250, 250, 250), font=fnt_title)
-    ncount += ncountSB + 1
-
-#define the size of the canvas, incl. space for the title header
-if deck_list.game == decklist.MTG:
-    deckwidth = 280
-    deckheight = 34*(ncount+1)
-elif deck_list.game == decklist.POKEMON:
-    deckwidth = 219
-    deckheight = 35*(ncount+1)
-elif deck_list.game == decklist.HEX:
-    deckwidth = 320
-    deckheight = 35*(ncount+1)
-
-#reset the sideboard marker
-isSideboard = 0
-
-deck = Image.new("RGB", (deckwidth, deckheight), "white")
-
-deck.paste(title, (0,0))
-
-#now read the decklist
-if deck_list.game == decklist.MTG:
-        lands = []
-
-        for card in deck_list.mainboard:
-            #this step checks whether a specific art is requested by the user - provided via the set name
-
-            if card.cost == "*":
-                lands.append(card)
-                continue
-            draw_mtg_card(card, nstep)
-            nstep = nstep + 1
-
-        for card in lands:
-            draw_mtg_card(card, nstep)
-            nstep = nstep + 1
-
-        if doSideboard:
-            deck.paste(sideboard, (0,34*nstep))
-            nstep = nstep + 1
-            for card in deck_list.sideboard:
+                if card.cost == "*":
+                    lands.append(card)
+                    continue
                 draw_mtg_card(card, nstep)
                 nstep = nstep + 1
 
-elif deck_list.game == decklist.POKEMON:
-    for card in deck_list.mainboard:
-            quantity = card.quantity
-            lookupScan, displayname = scraper.download_scanPKMN(card.name, card.set, card.collector_num)
-            
-            img = Image.open(lookupScan)
+            for card in lands:
+                draw_mtg_card(card, nstep)
+                nstep = nstep + 1
+
+            if doSideboard:
+                deck.paste(sideboard, (0,34*nstep))
+                nstep = nstep + 1
+                for card in deck_list.sideboard:
+                    draw_mtg_card(card, nstep)
+                    nstep = nstep + 1
+
+    elif deck_list.game == decklist.POKEMON:
+        for card in deck_list.mainboard:
+                quantity = card.quantity
+                lookupScan, displayname = scraper.download_scanPKMN(card.name, card.set, card.collector_num)
+                
+                img = Image.open(lookupScan)
+
+                #check if im has Alpha band...
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+
+                #resize the gradient to the size of im...
+                alpha = gradient.resize(img.size)
+
+                #put alpha in the alpha band of im...
+                img.putalpha(alpha)
+
+                bkgd = Image.new("RGB", img.size, "black")
+                bkgd.paste(img, (0, 0), mask=img)
+
+                cut = bkgd.crop((xtopPKMN, ytopPKMN+90, xbotPKMN-10, ybotPKMN+100))
+                cut = cut.resize((deckwidth,34))
+
+                draw = ImageDraw.Draw(cut)
+                #create text outline
+                draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+                draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+                draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+                draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+                #enter text
+                draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=fnt)
+
+                #place the cropped picture of the current card
+                deck.paste(cut, (0, 35 * nstep))
+
+                nstep = nstep+1
+
+    elif deck_list.game == decklist.HEX:
+        banner = Image.new("RGB", (deckheight-35, 50), "black")
+        if len(deck_list.commander) > 0:
+            cmdr = deck_list.commander[0]
+            guid = cmdr.collector_num
+            typeCM = cmdr.set
+
+            drawbanner = ImageDraw.Draw(banner)
+            drawbanner.text((15,15), str(cmdr.name), (250,250,250), font=fnt_title)
+
+            lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
+
+            mainguyImg = Image.open(lookupScan)
+            mainguycut = mainguyImg.crop((135,55,185,275))
+
+            banner = banner.rotate(90, expand=True)
 
             #check if im has Alpha band...
-            if img.mode != 'RGBA':
-                img = img.convert('RGBA')
+            if mainguycut.mode != 'RGBA':
+                mainguycut = mainguycut.convert('RGBA')
 
             #resize the gradient to the size of im...
-            alpha = gradient.resize(img.size)
+            alpha = Hexgradient.resize(mainguycut.size)
 
             #put alpha in the alpha band of im...
-            img.putalpha(alpha)
+            mainguycut.putalpha(alpha)
 
-            bkgd = Image.new("RGB", img.size, "black")
-            bkgd.paste(img, (0, 0), mask=img)
+            banner.paste(mainguycut, (0,0), mask=mainguycut)
 
-            cut = bkgd.crop((xtopPKMN, ytopPKMN+90, xbotPKMN-10, ybotPKMN+100))
-            cut = cut.resize((deckwidth,34))
+            deck.paste(banner, (0,35))
 
-            draw = ImageDraw.Draw(cut)
-            #create text outline
-            draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-            draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-            draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-            draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-            #enter text
-            draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=fnt)
-
-            #place the cropped picture of the current card
-            deck.paste(cut, (0, 35 * nstep))
-
-            nstep = nstep+1
-
-elif deck_list.game == decklist.HEX:
-    banner = Image.new("RGB", (deckheight-35, 50), "black")
-    if len(deck_list.commander) > 0:
-        cmdr = deck_list.commander[0]
-        guid = cmdr.collector_num
-        typeCM = cmdr.set
-
-        drawbanner = ImageDraw.Draw(banner)
-        drawbanner.text((15,15), str(cmdr.name), (250,250,250), font=fnt_title)
-
-        lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
-
-        mainguyImg = Image.open(lookupScan)
-        mainguycut = mainguyImg.crop((135,55,185,275))
-
-        banner = banner.rotate(90, expand=True)
-
-        #check if im has Alpha band...
-        if mainguycut.mode != 'RGBA':
-            mainguycut = mainguycut.convert('RGBA')
-
-        #resize the gradient to the size of im...
-        alpha = Hexgradient.resize(mainguycut.size)
-
-        #put alpha in the alpha band of im...
-        mainguycut.putalpha(alpha)
-
-        banner.paste(mainguycut, (0,0), mask=mainguycut)
-
-        deck.paste(banner, (0,35))
-
-    for card in deck_list.mainboard:
-        draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
-        nstep = nstep + 1
-
-    if doSideboard:
-        deck.paste(sideboard, (50,35*nstep))
-        nstep = nstep + 1
-        for card in deck_list.sideboard:
+        for card in deck_list.mainboard:
             draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
             nstep = nstep + 1
-            
-if deck_list.game == decklist.MTG:
-    deck = deck.crop((0, 0, deckwidth - 10, deckheight))
-elif deck_list.game == decklist.POKEMON:
-    deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
-elif deck_list.game == decklist.HEX:
-    deck = deck.crop((0, 0, deckwidth-22, deckheight))
-    
-deck.save(str(sys.argv[1])[0:-4] + ".png")
-altpath = config.Get('options', 'output_path')
-if altpath is not None:
-    deck.save(altpath)
+
+        if doSideboard:
+            deck.paste(sideboard, (50,35*nstep))
+            nstep = nstep + 1
+            for card in deck_list.sideboard:
+                draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
+                nstep = nstep + 1
+                
+    if deck_list.game == decklist.MTG:
+        deck = deck.crop((0, 0, deckwidth - 10, deckheight))
+    elif deck_list.game == decklist.POKEMON:
+        deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
+    elif deck_list.game == decklist.HEX:
+        deck = deck.crop((0, 0, deckwidth-22, deckheight))
+        
+    deck.save(str(filename)[0:-4] + ".png")
+    altpath = config.Get('options', 'output_path')
+    if altpath is not None:
+        deck.save(altpath)
+
+if __name__ == "__main__":
+    main(sys.argv[1])

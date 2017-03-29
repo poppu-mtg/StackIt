@@ -1,24 +1,29 @@
 import os
+import globals
+
 from tkinter import *
-from tkFileDialog import *
+# from tkFileDialog import *
 
 from PIL import Image, ImageTk
 
+
 def OpenPro1():
-    
     if mGui.Listname.get() != '':
         deckname = mGui.Listname.get()
     elif len(mGui.Listentry.get("1.0", "end-1c")) != 0:
         deckname = 'sample.txt'
         decktext = mGui.Listentry.get("1.0",'end-1c')
         with open(deckname, "a") as outf:
-            outf.write(decktext)
-        
-    sys.argv = ['StackIt.py',deckname]
-    execfile('StackIt.py',globals())
+            outf.write(decktext + '\n')
+
+    import StackIt
+    StackIt.main(deckname)
 
     if deckname == 'sample.txt':
-        os.rename(deckname,os.path.join('.','cache',deckname))
+        if os.path.exists(os.path.join(globals.CACHE_PATH, deckname)):
+            os.remove(os.path.join(globals.CACHE_PATH, deckname))
+
+        os.rename(deckname, os.path.join(globals.CACHE_PATH, deckname))
 
     novi = Toplevel()
     canvas = Canvas(novi, width = 350, height = 1000)
