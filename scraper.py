@@ -192,6 +192,7 @@ def get_json(cardname, expansion):
     number = card.get('number', None)
     if not str(expansion).upper() in printings:
         #grabbing the last item relies on MCI having those scans already
+        printings.reverse()
         for printing in printings:
             if download_scan(fullname, printing) is not None:
                 expansion = printing

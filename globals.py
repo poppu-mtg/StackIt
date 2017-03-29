@@ -29,13 +29,15 @@ else:
 
 
 # print("DIR={0}".format(localdir))
+CACHE_PATH = os.path.join(globaldir, 'cache')
+RESOURCES_PATH = os.path.join(localdir, 'resources')
 
-SCAN_PATH = os.path.join(globaldir, 'cache', 'Scans')
-CMC_PATH = os.path.join(globaldir, 'cache', 'manacosts')
+SCAN_PATH = os.path.join(CACHE_PATH, 'Scans')
+CMC_PATH = os.path.join(CACHE_PATH, 'manacosts')
 
 def mkcachepaths():
-    if not os.path.exists(os.path.join(globaldir, 'cache')):
-        os.mkdir(os.path.join(globaldir, 'cache'))
+    if not os.path.exists(CACHE_PATH):
+        os.mkdir(CACHE_PATH)
     if not os.path.exists(SCAN_PATH):
         os.mkdir(SCAN_PATH)
     if not os.path.exists(CMC_PATH):

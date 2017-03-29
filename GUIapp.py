@@ -1,24 +1,32 @@
-import os
-from tkinter import *
-from tkFileDialog import *
+import os, sys, time
+import globals
+
+if sys.version_info.major == 3:
+    from tkinter import *
+else:
+    from Tkinter import *
+# from tkFileDialog import *
 
 from PIL import Image, ImageTk
 
+
 def OpenPro1():
-    
     if mGui.Listname.get() != '':
         deckname = mGui.Listname.get()
     elif len(mGui.Listentry.get("1.0", "end-1c")) != 0:
         deckname = 'sample.txt'
         decktext = mGui.Listentry.get("1.0",'end-1c')
         with open(deckname, "a") as outf:
-            outf.write(decktext)
-        
-    sys.argv = ['StackIt.py',deckname]
-    execfile('StackIt.py',globals())
+            outf.write(decktext + '\n')
+
+    import StackIt
+    StackIt.main(deckname)
 
     if deckname == 'sample.txt':
-        os.rename(deckname,os.path.join('.','cache',deckname))
+        if os.path.exists(os.path.join(globals.CACHE_PATH, deckname)):
+            os.remove(os.path.join(globals.CACHE_PATH, deckname))
+
+        os.rename(deckname, os.path.join(globals.CACHE_PATH, deckname))
 
     novi = Toplevel()
     canvas = Canvas(novi, width = 350, height = 1000)
@@ -36,7 +44,7 @@ mGui.configure(background='white')
 mGui.title('  StackIt')
 mGui.geometry("350x550")
 
-tkimage = ImageTk.PhotoImage(Image.open('StackIt-Logo.png').resize((345,87)))
+tkimage = ImageTk.PhotoImage(Image.open(os.path.join(globals.RESOURCES_PATH, 'StackIt-Logo.png')).resize((345,87)))
 mGui.Logo = Label(mGui, image=tkimage)
 mGui.Logo.grid(row=0, column=0, columnspan=3)
 
@@ -58,7 +66,24 @@ mGui.Label2.grid(row=2, column=0, columnspan=3)
 mGui.Listentry=Text(mGui, height=25, width=40, relief=GROOVE, undo=True, xscrollcommand=True, yscrollcommand=True, bd=2)
 mGui.Listentry.grid(row=3, column=0, columnspan=3)
 
-mGui.mainloop()
+if len(sys.argv) > 1 and sys.argv[1] == "--automatedtest":
+    def draw():
+        mGui.update_idletasks()
+        mGui.update()
+
+    draw()
+    mGui.Listentry.insert(END, "60 Island\n4 Urza's Tower\n200 Shadowborn Apostle")
+    draw()
+    OpenPro1()
+    draw()
+    mGui.Listname.insert(END, "testdecks/StressTest1.dec")
+    draw()
+    OpenPro1()
+    draw()
+    time.sleep(1)
+else:
+    mGui.mainloop()
+
 
 
 #class MainWindow():
