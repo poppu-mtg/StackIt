@@ -44,7 +44,7 @@ mGui.configure(background='white')
 mGui.title('  StackIt')
 mGui.geometry("350x550")
 
-tkimage = ImageTk.PhotoImage(Image.open('StackIt-Logo.png').resize((345,87)))
+tkimage = ImageTk.PhotoImage(Image.open(os.path.join(globals.RESOURCES_PATH, 'StackIt-Logo.png')).resize((345,87)))
 mGui.Logo = Label(mGui, image=tkimage)
 mGui.Logo.grid(row=0, column=0, columnspan=3)
 
@@ -66,7 +66,7 @@ mGui.Label2.grid(row=2, column=0, columnspan=3)
 mGui.Listentry=Text(mGui, height=25, width=40, relief=GROOVE, undo=True, xscrollcommand=True, yscrollcommand=True, bd=2)
 mGui.Listentry.grid(row=3, column=0, columnspan=3)
 
-if sys.argv[1] == "--automatedtest":
+if len(sys.argv) > 1 and sys.argv[1] == "--automatedtest":
     def draw():
         mGui.update_idletasks()
         mGui.update()

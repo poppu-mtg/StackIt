@@ -30,6 +30,7 @@ else:
 
 # print("DIR={0}".format(localdir))
 CACHE_PATH = os.path.join(globaldir, 'cache')
+RESOURCES_PATH = os.path.join(localdir, 'resources')
 
 SCAN_PATH = os.path.join(CACHE_PATH, 'Scans')
 CMC_PATH = os.path.join(CACHE_PATH, 'manacosts')

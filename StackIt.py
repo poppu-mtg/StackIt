@@ -48,7 +48,7 @@ def GenerateCMC(name, cost):
                 continue
             #add correct treatment of separation for split cards
             elif cost[n] == '/':
-                symbol = os.path.join(globals.localdir, 'resources', 'mana', 'Mana_spn.png')
+                symbol = os.path.join(globals.RESOURCES_PATH, 'mana', 'Mana_spn.png')
                 tap0 = Image.open(symbol)
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
@@ -61,7 +61,7 @@ def GenerateCMC(name, cost):
                     greaterthan9 = True
                 else:
                     finalcost = cost[n]
-                symbol = os.path.join(globals.localdir, 'resources', 'mana', 'Mana_'+finalcost+'.png')
+                symbol = os.path.join(globals.RESOURCES_PATH, 'mana', 'Mana_'+finalcost+'.png')
 
                 tap0 = Image.open(symbol)
                 if tap0.mode != 'RGBA':
@@ -206,20 +206,20 @@ def main(filename):
     # create a header with the deck's name
     global fnt
     if deck_list.game == decklist.MTG:
-        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 14)
-        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 18)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 14)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 18)
         title = Image.new("RGB", (280, 34), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text((10, 7), os.path.basename(str(filename))[0:-4], (250, 250, 250), font=fnt_title)
     elif deck_list.game == decklist.POKEMON:
-        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 10)
-        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 10)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
         title = Image.new("RGB", (219, 35), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text((10, 8), os.path.basename(str(filename))[0:-4],(250, 250, 250), font=fnt_title)
     elif deck_list.game == decklist.HEX:
-        fnt = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 16)
-        fnt_title = ImageFont.truetype(os.path.join(globals.localdir, 'resources', 'fonts', 'Arial Bold.ttf'), 18)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 16)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 18)
         title = Image.new("RGB", (320,34), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
@@ -227,7 +227,7 @@ def main(filename):
             #print nametitle,nshard
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard,'')
-                newshard = Image.open(os.path.join(globals.localdir, 'resources', 'mana',shard+'.png')).resize((20,20))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard+'.png')).resize((20,20))
                 title.paste(newshard,(10+nshard*20,7))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
