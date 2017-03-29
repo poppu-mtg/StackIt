@@ -1,7 +1,10 @@
-import os, time
+import os, sys, time
 import globals
 
-from tkinter import *
+if sys.version_info.major == 3:
+    from tkinter import *
+else:
+    from Tkinter import *
 # from tkFileDialog import *
 
 from PIL import Image, ImageTk
