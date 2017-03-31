@@ -66,21 +66,24 @@ mGui.Label2.grid(row=2, column=0, columnspan=3)
 mGui.Listentry=Text(mGui, height=25, width=40, relief=GROOVE, undo=True, xscrollcommand=True, yscrollcommand=True, bd=2)
 mGui.Listentry.grid(row=3, column=0, columnspan=3)
 
-if len(sys.argv) > 1 and sys.argv[1] == "--automatedtest":
-    def draw():
-        mGui.update_idletasks()
-        mGui.update()
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--automatedtest":
+        def draw():
+            mGui.update_idletasks()
+            mGui.update()
 
-    draw()
-    mGui.Listentry.insert(END, "60 Island\n4 Urza's Tower\n200 Shadowborn Apostle")
-    draw()
-    OpenPro1()
-    draw()
-    mGui.Listname.insert(END, "testdecks/StressTest1.dec")
-    draw()
-    OpenPro1()
-    draw()
-    time.sleep(1)
-else:
-    mGui.mainloop()
+        draw()
+        mGui.Listentry.insert(END, "60 Island\n4 Urza's Tower\n200 Shadowborn Apostle")
+        draw()
+        OpenPro1()
+        draw()
+        mGui.Listname.insert(END, "testdecks/StressTest1.dec")
+        draw()
+        OpenPro1()
+        draw()
+        time.sleep(1)
+    else:
+        mGui.mainloop()
 
+if __name__ == "__main__":
+    main()
