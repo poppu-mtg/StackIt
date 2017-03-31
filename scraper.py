@@ -28,14 +28,14 @@ def download_scan(name, expansion):
         name = name.split('/')[0]+' ('+name+')'
 
     scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
-    print(scannumber)
+    # print(scannumber)
     cardloc = None
     for item in scannumber:
         if item.find("/en/"):
 #            cardloc = scannumber[0][:-4].split("/")
             cardloc = item[:-4].split("/")
     if cardloc is None:
-        print('WARNING - Could not find {0} ({1})'.format(name, expansion))
+        # print('WARNING - Could not find {0} ({1})'.format(name, expansion))
         return None
     else:
         # print(cardloc)
@@ -212,6 +212,7 @@ def unaccent(text):
     return text
 
 def store(url, filename):
+    print('Downloading {0}'.format(url))
     r = requests.get(url, stream=True)
     with open(filename, 'wb') as f:
         for chunk in r.iter_content(1024):
