@@ -129,6 +129,10 @@ def get_card_info(line, quantity=None):
             #split the info at the first blank space
             name = data[0]
             expansion = data[1].split("\n")[0].lower()
+    elif line.endswith(')'):
+        name, expansion = line.split('(')
+        name = name.strip()
+        expansion = expansion.strip(')')
     else:
         #split the info at the first blank space
         name = line.strip()
