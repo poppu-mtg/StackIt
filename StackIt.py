@@ -387,4 +387,8 @@ if __name__ == "__main__":
         import GUIapp
         GUIapp.main()
     else:
-        main(sys.argv[1])
+        if os.path.isdir(sys.argv[1]):
+            import watcher
+            watcher.main(sys.argv[1])
+        else:
+            main(sys.argv[1])

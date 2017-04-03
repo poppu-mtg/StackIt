@@ -28,7 +28,7 @@ def parse_list(decklist):
     isDeckXML = mmap.mmap(decklist.fileno(), 0, access=mmap.ACCESS_READ)
     if isDeckXML.find(b'xml') != -1:
         print('decklist is in MTGO XML format')
-        decklist = preprocess_xml(decklist)
+        decklist = preprocess_xml(isDeckXML)
 
     for raw_line in decklist:
         line = raw_line.strip().replace('\t', ' ')
@@ -118,7 +118,7 @@ def parse_list(decklist):
 
 def preprocess_xml(decklist):
     '''Converts an XML (.dec) mtgo decklist into a standard decklist'''
-    info = xml.etree.ElementTree.parse(str(sys.argv[1])).getroot()
+    info = xml.etree.ElementTree.fromstring(decklist)
     mainboard = {}
     sideboard = {}
 
