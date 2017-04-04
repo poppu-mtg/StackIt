@@ -15,7 +15,10 @@ class StackItEventHandler(FileSystemEventHandler):
         print(event.src_path)
         if self.islist(event):
             time.sleep(1)
-            StackIt.main(event.src_path)
+            try:
+                StackIt.main(event.src_path)
+            except Exception as e:
+                print(e)
 
     def on_deleted(self, event):
         pass
@@ -24,7 +27,11 @@ class StackItEventHandler(FileSystemEventHandler):
         print(event.src_path)
         if self.islist(event):
             time.sleep(1)
-            StackIt.main(event.src_path)
+            try:
+                StackIt.main(event.src_path)
+            except Exception as e:
+                print(e)
+
 
 def main(path):
     print('Watching {0} for decks'.format(path))

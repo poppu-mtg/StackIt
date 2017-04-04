@@ -10,9 +10,8 @@ from globals import Card, specmana, mtgreprints
 
 def download_scan(name, expansion):
     expansion = expansion.lower()
-    if expansion == 'mps':
-        # This is the only place I know where mtgjson and magiccards.info differ on set codes. 
-        expansion = 'mpskld'
+    if expansion in globals.setmappings.keys():
+        expansion = globals.setmappings[expansion]
 
     name2 = ''.join(e for e in name if e.isalnum())
     localname = name2+'_'+expansion+'.jpg'
@@ -142,7 +141,7 @@ def get_card_info(line, quantity=None):
     if quantity == 0:
         return None
 
-    if name.lower() in ["plains", "island", "swamp", "mountain", "forest"]:
+    if name.lower() in ["plains", "island", "swamp", "mountain", "forest"] and expansion is None:
         isitland = True
 
     if not isitland:

@@ -18,6 +18,8 @@ specmana = {
 #create a list of reprint sets:
 mtgreprints = ['MMA','MM2','MM3','EMA','TPR','CHR','MD1']
 
+setmappings = {'mps': 'mpskld', 'unh': 'uh'}
+
 # pyinstaller
 if getattr(sys, 'frozen', False):
     print('Using Bundled Python')
