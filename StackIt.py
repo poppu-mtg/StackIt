@@ -103,9 +103,9 @@ def draw_hex_card(name, guid, quantity, nstep):
 def draw_mtg_card(card, nstep):
     if card.name.find(" // ") != -1:
         namesplit = card.name.replace(" // ", "/")
-        lookupScan = scraper.download_scan(namesplit, card.set)
+        lookupScan = scraper.download_scan(namesplit, card.set, card.collector_num)
     else:
-        lookupScan = scraper.download_scan(card.name, card.set)
+        lookupScan = scraper.download_scan(card.name, card.set, card.collector_num)
 
     img = Image.open(lookupScan)
     if card.name.find(" // ") != -1:

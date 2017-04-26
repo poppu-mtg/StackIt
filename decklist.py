@@ -123,16 +123,17 @@ def preprocess_xml(decklist):
     sideboard = {}
 
     for atype in info.findall('Cards'):
+        name = '{n} (mtgo:{id})'.format(n=atype.get('Name'), id=atype.get('CatID'))
         if atype.get('Sideboard') == "true":
-            if atype.get('Name') in sideboard:
-                sideboard[atype.get('Name')] += int(atype.get('Quantity'))
+            if name in sideboard:
+                sideboard[name] += int(atype.get('Quantity'))
             else:
-                sideboard[atype.get('Name')] = int(atype.get('Quantity'))
+                sideboard[name] = int(atype.get('Quantity'))
         else:
-            if atype.get('Name') in mainboard:
-                mainboard[atype.get('Name')] += int(atype.get('Quantity'))
+            if name in mainboard:
+                mainboard[name] += int(atype.get('Quantity'))
             else:
-                mainboard[atype.get('Name')] = int(atype.get('Quantity'))
+                mainboard[name] = int(atype.get('Quantity'))
 
     decklist = []
     for card in list(mainboard.keys()):
