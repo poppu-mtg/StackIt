@@ -94,6 +94,7 @@ def parse_list(decklist):
                     mainboard.append(card)
         elif game == MTG:
             quantity, name = line.split(' ', 1)
+            quantity = quantity.strip('x') # '4x' -> '4'
             card = scraper.get_card_info(name, quantity)
             if isSideboard:
                 sideboard.append(card)

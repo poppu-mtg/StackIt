@@ -102,7 +102,7 @@ def download_scanHex(name, namescan):
 
     return lookupScan
 
-def get_card_info(line, quantity=None):
+def get_card_info(line, quantity):
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
     line = line.replace('\t', ' ')
@@ -114,11 +114,6 @@ def get_card_info(line, quantity=None):
     splitcost = False
     n_cost = 0
     altcmc_list = []
-
-    if quantity is None:
-        data = line.split(" ", 1)
-        quantity = int(data[0])
-        line = data[1]
 
     if line.find(' / ') != -1:
         data = line.split(" / ")
