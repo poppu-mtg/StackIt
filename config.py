@@ -7,11 +7,11 @@ if not os.path.exists(os.path.join(globals.globaldir, 'settings.yml')):
     with open('settings.yml', 'w') as f:
         f.write("""
 cards:
-  plains: uh
-  island: uh
-  swamp: uh
-  mountain: uh
-  forest: uh
+  plains: unh
+  island: unh
+  swamp: unh
+  mountain: unh
+  forest: unh
 options:
   display_sideboard: yes
 """)

@@ -28,7 +28,7 @@ def parse_list(decklist):
     isDeckXML = mmap.mmap(decklist.fileno(), 0, access=mmap.ACCESS_READ)
     if isDeckXML.find(b'xml') != -1:
         print('decklist is in MTGO XML format')
-        decklist = preprocess_xml(decklist)
+        decklist = preprocess_xml(isDeckXML)
 
     for raw_line in decklist:
         line = raw_line.strip().replace('\t', ' ')
@@ -94,6 +94,7 @@ def parse_list(decklist):
                     mainboard.append(card)
         elif game == MTG:
             quantity, name = line.split(' ', 1)
+            quantity = quantity.strip('x') # '4x' -> '4'
             card = scraper.get_card_info(name, quantity)
             if isSideboard:
                 sideboard.append(card)
@@ -118,21 +119,22 @@ def parse_list(decklist):
 
 def preprocess_xml(decklist):
     '''Converts an XML (.dec) mtgo decklist into a standard decklist'''
-    info = xml.etree.ElementTree.parse(str(sys.argv[1])).getroot()
+    info = xml.etree.ElementTree.fromstring(decklist)
     mainboard = {}
     sideboard = {}
 
     for atype in info.findall('Cards'):
+        name = '{n} (mtgo:{id})'.format(n=atype.get('Name'), id=atype.get('CatID'))
         if atype.get('Sideboard') == "true":
-            if atype.get('Name') in sideboard:
-                sideboard[atype.get('Name')] += int(atype.get('Quantity'))
+            if name in sideboard:
+                sideboard[name] += int(atype.get('Quantity'))
             else:
-                sideboard[atype.get('Name')] = int(atype.get('Quantity'))
+                sideboard[name] = int(atype.get('Quantity'))
         else:
-            if atype.get('Name') in mainboard:
-                mainboard[atype.get('Name')] += int(atype.get('Quantity'))
+            if name in mainboard:
+                mainboard[name] += int(atype.get('Quantity'))
             else:
-                mainboard[atype.get('Name')] = int(atype.get('Quantity'))
+                mainboard[name] = int(atype.get('Quantity'))
 
     decklist = []
     for card in list(mainboard.keys()):

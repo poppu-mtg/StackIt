@@ -8,14 +8,16 @@ import unicodedata
 from lxml import html
 from globals import Card, specmana, mtgreprints
 
-def download_scan(name, expansion):
+def download_scan(name, expansion, number):
+    if number is None:
+        number = '0'
     expansion = expansion.lower()
-    if expansion == 'mps':
-        # This is the only place I know where mtgjson and magiccards.info differ on set codes. 
-        expansion = 'mpskld'
+    if expansion in globals.setmappings.keys():
+        expansion = globals.setmappings[expansion]
 
     name2 = ''.join(e for e in name if e.isalnum())
-    localname = name2+'_'+expansion+'.jpg'
+    print([name2, expansion, number])
+    localname = '_'.join([name2, expansion, number]) + '.jpg'
     lookupScan = os.path.join(globals.SCAN_PATH, localname)
     if os.path.exists(lookupScan):
         return lookupScan
@@ -32,7 +34,6 @@ def download_scan(name, expansion):
     cardloc = None
     for item in scannumber:
         if item.find("/en/"):
-#            cardloc = scannumber[0][:-4].split("/")
             cardloc = item[:-4].split("/")
     if cardloc is None:
         # print('WARNING - Could not find {0} ({1})'.format(name, expansion))
@@ -101,7 +102,7 @@ def download_scanHex(name, namescan):
 
     return lookupScan
 
-def get_card_info(line, quantity=None):
+def get_card_info(line, quantity):
     # Tappedout puts tabs instead of spaces.
     # Easiest solution is to just sub them for spaces.
     line = line.replace('\t', ' ')
@@ -114,11 +115,6 @@ def get_card_info(line, quantity=None):
     n_cost = 0
     altcmc_list = []
 
-    if quantity is None:
-        data = line.split(" ", 1)
-        quantity = int(data[0])
-        line = data[1]
-
     if line.find(' / ') != -1:
         data = line.split(" / ")
         #for non-XML files, we need to check if this is a split card
@@ -129,6 +125,10 @@ def get_card_info(line, quantity=None):
             #split the info at the first blank space
             name = data[0]
             expansion = data[1].split("\n")[0].lower()
+    elif line.endswith(')'):
+        name, expansion = line.split('(')
+        name = name.strip()
+        expansion = expansion.strip(')')
     else:
         #split the info at the first blank space
         name = line.strip()
@@ -138,7 +138,7 @@ def get_card_info(line, quantity=None):
     if quantity == 0:
         return None
 
-    if name.lower() in ["plains", "island", "swamp", "mountain", "forest"]:
+    if name.lower() in ["plains", "island", "swamp", "mountain", "forest"] and expansion is None:
         isitland = True
 
     if not isitland:
@@ -175,6 +175,9 @@ def get_card_info(line, quantity=None):
     return Card(name, expansion, manacost, quantity, collector_num=number)
 
 def get_json(cardname, expansion):
+    if expansion is not None and expansion.startswith('mtgo:'):
+        return scryfall_mtgo(cardname, expansion[5:])
+
     fullname = cardname
     if ' // ' in cardname:
         splitcard = True
@@ -194,7 +197,7 @@ def get_json(cardname, expansion):
         #grabbing the last item relies on MCI having those scans already
         printings.reverse()
         for printing in printings:
-            if download_scan(fullname, printing) is not None:
+            if download_scan(fullname, printing, number) is not None:
                 expansion = printing
                 break
 
@@ -204,6 +207,27 @@ def get_json(cardname, expansion):
         card = blob['cards'][0]
         mana_cost = mana_cost + ' // ' + card.get('manaCost', None)
     # print((cardname, expansion, mana_cost, typeline))
+    return expansion, mana_cost, typeline, number
+
+def scryfall_mtgo(cardname, id):
+    blob = requests.get('http://api.scryfall.com/cards/mtgo/{0}'.format(id)).text
+    blob = json.loads(blob)
+    if blob['object'] == 'error': # Sadface
+        print('WARNING: MTGO id {id} ({name}) is not known to Scryfall.'.format(id=id, name=cardname))
+        blob = requests.get('http://api.scryfall.com/cards/named?exact={0}'.format(cardname)).text
+        blob = json.loads(blob)
+
+    expansion = blob['set']
+    mana_cost = blob.get('mana_cost', None)
+    typeline = blob['type_line']
+    number = blob['collector_number']
+
+    name2 = ''.join(e for e in cardname if e.isalnum())
+    localname = '_'.join([name2, expansion, number]) + '.jpg'
+    lookupScan = os.path.join(globals.SCAN_PATH, localname)
+    if not os.path.exists(lookupScan):
+        store(blob['image_uri'], lookupScan)
+    
     return expansion, mana_cost, typeline, number
 
 def unaccent(text):
