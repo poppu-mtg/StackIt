@@ -1,5 +1,5 @@
 import os, sys, time
-import StackIt
+import builder
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -16,7 +16,7 @@ class StackItEventHandler(FileSystemEventHandler):
         if self.islist(event):
             time.sleep(1)
             try:
-                StackIt.main(event.src_path)
+                builder.main(event.src_path)
             except Exception as e:
                 print(e)
 
@@ -28,7 +28,7 @@ class StackItEventHandler(FileSystemEventHandler):
         if self.islist(event):
             time.sleep(1)
             try:
-                StackIt.main(event.src_path)
+                builder.main(event.src_path)
             except Exception as e:
                 print(e)
 
