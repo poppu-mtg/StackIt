@@ -1,5 +1,6 @@
 import os, sys, time
 import globals
+import builder
 
 if sys.version_info.major == 3:
     from tkinter import *
@@ -19,8 +20,7 @@ def OpenPro1():
         with open(deckname, "a") as outf:
             outf.write(decktext + '\n')
 
-    import StackIt
-    StackIt.main(deckname)
+    builder.main(deckname)
 
     if deckname == 'sample.txt':
         if os.path.exists(os.path.join(globals.CACHE_PATH, deckname)):
