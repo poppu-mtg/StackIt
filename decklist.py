@@ -43,7 +43,10 @@ def parse_list(decklist):
                 print('Decklist is for Pokemon TCGO ...')
                 game = POKEMON
                 isSideboard = False
-            continue
+            elif line[2].isdigit():
+                line = line[2:]
+            else:
+                continue
 
         if line.lower().find('champion:') != -1 or line.lower().find('mercenary:') != -1:
             print('Decklist is for Hex TCG')
@@ -103,7 +106,6 @@ def parse_list(decklist):
         elif game == POKEMON:
             if line[0].isdigit():
                 data = line.split(' ')
-
                 quantity = data[0]
                 set = data[-2]
                 setID = data[-1]

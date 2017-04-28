@@ -51,7 +51,10 @@ def download_scan(name, expansion, number):
     return lookupScan
 
 def download_scanPKMN(name, expansion, expID):
-    name = unaccent(name[:-1].decode('latin-1'))
+    if globals.PY3:
+        name = name[:-1]
+    else:
+        name = unaccent(name[:-1].decode('latin-1'))
     displayname = name
     name = name.replace(' ', '-').replace("'", '')
 
