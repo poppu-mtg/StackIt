@@ -30,6 +30,7 @@ else:
     globaldir = sys.path[0]
 
 PY3 = sys.version_info > (3, 0)
+print('Running on python ' + sys.version)
 
 # print("DIR={0}".format(localdir))
 CACHE_PATH = os.path.join(globaldir, 'cache')
