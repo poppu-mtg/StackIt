@@ -1,34 +1,33 @@
-import os, sys, time
+import os, shutil, sys, time
 import builder
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+def islist(event):
+    return not event.is_directory and not os.path.splitext(event.src_path)[1] == ".png"
+
 class StackItEventHandler(FileSystemEventHandler):
-    def islist(self, event):
-        return not event.is_directory and not os.path.splitext(event.src_path)[1] == ".png"
 
     def on_moved(self, event):
         pass
 
     def on_created(self, event):
-        print(event.src_path)
-        if self.islist(event):
-            time.sleep(1)
-            try:
-                builder.main(event.src_path)
-            except Exception as e:
-                print(e)
+        # self.on_modified(self, event)
+        pass
 
     def on_deleted(self, event):
         pass
 
     def on_modified(self, event):
         print(event.src_path)
-        if self.islist(event):
+        if islist(event):
             time.sleep(1)
+            if os.path.exists(self.static_img):
+                os.remove(self.static_img)
             try:
-                builder.main(event.src_path)
+                res = builder.main(event.src_path)
+                shutil.copyfile(res, self.static_img)
             except Exception as e:
                 print(e)
 
@@ -36,6 +35,7 @@ class StackItEventHandler(FileSystemEventHandler):
 def main(path):
     print('Watching {0} for decks'.format(path))
     event_handler = StackItEventHandler()
+    event_handler.static_img = os.path.join(path, 'StackIt.png')
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
