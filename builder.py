@@ -374,8 +374,10 @@ def main(filename):
         deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
     elif deck_list.game == decklist.HEX:
         deck = deck.crop((0, 0, deckwidth-22, deckheight))
-        
-    deck.save(str(filename)[0:-4] + ".png")
+    
+    output_path = str(filename)[0:-4] + ".png"
+    deck.save(output_path)
     altpath = config.Get('options', 'output_path')
     if altpath is not None:
         deck.save(altpath)
+    return output_path
