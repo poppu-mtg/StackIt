@@ -16,6 +16,8 @@ def OpenPro1():
         deckname = mGui.Listname.get()
     elif len(mGui.Listentry.get("1.0", "end-1c")) != 0:
         deckname = 'sample.txt'
+        if os.path.isfile(deckname):
+            os.remove(deckname)
         decktext = mGui.Listentry.get("1.0",'end-1c')
         with open(deckname, "a") as outf:
             outf.write(decktext + '\n')
