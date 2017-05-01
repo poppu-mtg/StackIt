@@ -20,6 +20,12 @@ mtgreprints = ['MMA','MM2','MM3','EMA','TPR','CHR','MD1']
 
 setmappings = {'mps': 'mpskld', 'unh': 'uh'}
 
+aftermath = [
+    'Dusk // Dawn','Commit // Memory','Never // Return','Insult // Injury','Mouth // Feed','Start // Finish',
+    'Reduce // Rubble','Destined // Lead','Onward // Victory','Spring // Mind','Prepare // Fight','Failure // Comply',
+    'Rags // Riches','Cut // Ribbons','Heaven // Earth'
+]
+
 # pyinstaller
 if getattr(sys, 'frozen', False):
     print('Using Bundled Python')

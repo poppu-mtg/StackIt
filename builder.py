@@ -15,7 +15,7 @@ import xml.etree.ElementTree
 from lxml import html
 
 import scraper, config, decklist, globals
-from globals import Card, specmana
+from globals import Card, specmana, aftermath
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 
@@ -101,14 +101,19 @@ def draw_hex_card(name, guid, quantity, nstep):
     deck.paste(cut, (50,35*nstep))
 
 def draw_mtg_card(card, nstep):
+
+    isAftermath = False
+
     if card.name.find(" // ") != -1:
         namesplit = card.name.replace(" // ", "/")
         lookupScan = scraper.download_scan(namesplit, card.set, card.collector_num)
+        if card.name in aftermath:
+            isAftermath = True
     else:
         lookupScan = scraper.download_scan(card.name, card.set, card.collector_num)
 
     img = Image.open(lookupScan)
-    if card.name.find(" // ") != -1:
+    if (card.name.find(" // ") != -1) and (isAftermath == False): 
         img = img.rotate(-90)
 
     #check if im has Alpha band...
@@ -124,7 +129,10 @@ def draw_mtg_card(card, nstep):
     bkgd = Image.new("RGB", img.size, "black")
     bkgd.paste(img, (0,0), mask=img)
 
-    cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+    if isAftermath == True:
+        cut = bkgd.crop((xtop+12, ytop+55, xbot, ybot+55))
+    else:
+        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
 
     draw = ImageDraw.Draw(cut)
     #create text outline
