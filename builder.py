@@ -147,13 +147,21 @@ def draw_mtg_card(card, nstep):
 
     #place the cropped picture of the current card
     deck.paste(cut, (0, 34 * nstep))
+    #for scrolling decklist
+    tmpwidth,tmpheight = cut.size
+    cut2 = cut.crop((0,0,tmpwidth-10,tmpheight))
+    deck2.paste(cut2, (270 * nstep, 0))
 
     #adjust cmc size to reflex manacost greater than 9
     if adjustcmc:
         deck.paste(cmc, (280-15*len(card.cost),8+34*nstep), mask=cmc)
+        #for scrolling decklist
+        deck2.paste(cmc, (270*(nstep+1)-15*len(card.cost),8), mask=cmc)
         adjustcmc = False
     else:
         deck.paste(cmc, (280-15*(len(card.cost)+1),8+34*nstep), mask=cmc)
+        #for scrolling decklist
+        deck2.paste(cmc, (270*(nstep+1)-15*(len(card.cost)+1),8), mask=cmc)
 
 globals.mkcachepaths()
 
@@ -258,6 +266,9 @@ def main(filename):
     if deck_list.game == decklist.MTG:
         deckwidth = 280
         deckheight = 34*(ncount+1)
+        #for scrolling decklist
+        deckwidth2 = 270*(ncount+1)
+        deckheight2 = 34
     elif deck_list.game == decklist.POKEMON:
         deckwidth = 219
         deckheight = 35*(ncount+1)
@@ -270,8 +281,14 @@ def main(filename):
     
     global deck
     deck = Image.new("RGB", (deckwidth, deckheight), "white")
+    #for scrolling decklist
+    global deck2
+    deck2 = Image.new("RGB", (deckwidth2, deckheight2), "white")
 
     deck.paste(title, (0,0))
+    #for scrolling decklist
+    title2 = title.crop((0, 0, 270, 34))
+    deck2.paste(title2, (0,0))
 
     #now read the decklist
     if deck_list.game == decklist.MTG:
@@ -292,6 +309,9 @@ def main(filename):
 
             if doSideboard:
                 deck.paste(sideboard, (0,34*nstep))
+                #for scrolling decklist
+                sideboard2 = sideboard.crop((0, 0, 270, 34))
+                deck2.paste(sideboard2, (270*nstep,0))
                 nstep = nstep + 1
                 for card in deck_list.sideboard:
                     draw_mtg_card(card, nstep)
@@ -378,6 +398,7 @@ def main(filename):
                 
     if deck_list.game == decklist.MTG:
         deck = deck.crop((0, 0, deckwidth - 10, deckheight))
+        deck2 = deck2.crop((0, 0, deckwidth2, deckheight2 - 2))
     elif deck_list.game == decklist.POKEMON:
         deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
     elif deck_list.game == decklist.HEX:
@@ -385,6 +406,9 @@ def main(filename):
     
     output_path = str(filename)[0:-4] + ".png"
     deck.save(output_path)
+    #for scrolling decklist
+    output_path2 = str(filename)[0:-4] + "-scroll.png"
+    deck2.save(output_path2)
     altpath = config.Get('options', 'output_path')
     if altpath is not None:
         deck.save(altpath)
