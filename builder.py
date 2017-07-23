@@ -22,7 +22,7 @@ from globals import Card, specmana, aftermath
 def GenerateCMC(name, cost):
     check9 = '0123456'
     adjustcmc = False
-    cmc = Image.new('RGBA',(16 * len(cost), 16))
+    cmc = Image.new('RGBA', (16 * len(cost), 16))
     diskcost = cost.strip().replace('*', '_').replace('/', '-')
     # lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     lookupCMC = os.path.join(globals.CMC_PATH, '{cost}.png'.format(cost=diskcost))
@@ -91,12 +91,12 @@ def draw_hex_card(name, guid, quantity, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
-    draw.text((8, 6),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
-    draw.text((6, 8),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
-    draw.text((8, 8),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
+    draw.text((6, 6), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
+    draw.text((8, 6), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
+    draw.text((6, 8), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
+    draw.text((8, 8), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7),str(quantity) + '  ' + name,(250, 250, 250), font=fnt)
+    draw.text((7, 7), str(quantity) + '  ' + name, (250, 250, 250), font=fnt)
 
     deck.paste(cut, (50, 35 * nstep))
 
@@ -136,27 +136,27 @@ def draw_mtg_card(card, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
-    draw.text((8, 6), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
-    draw.text((6, 8), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
-    draw.text((8, 8), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
+    draw.text((6, 6), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
+    draw.text((8, 6), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
+    draw.text((6, 8), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
+    draw.text((8, 8), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7), str(card.quantity) + '  ' + card.name,(250, 250, 250), font=fnt)
+    draw.text((7, 7), str(card.quantity) + '  ' + card.name, (250, 250, 250), font=fnt)
 
     cmc, adjustcmc = GenerateCMC(card.name, card.cost)
 
     #place the cropped picture of the current card
     deck.paste(cut, (0, 34 * nstep))
     #for scrolling decklist
-    tmpwidth,tmpheight = cut.size
-    cut2 = cut.crop((0, 0,tmpwidth - 10,tmpheight))
+    tmpwidth, tmpheight = cut.size
+    cut2 = cut.crop((0, 0, tmpwidth - 10, tmpheight))
     deck2.paste(cut2, (270 * nstep, 0))
 
     #adjust cmc size to reflex manacost greater than 9
     if adjustcmc:
-        deck.paste(cmc, (280 - 15 * len(card.cost),8 + 34 * nstep), mask=cmc)
+        deck.paste(cmc, (280 - 15 * len(card.cost), 8 + 34 * nstep), mask=cmc)
         #for scrolling decklist
-        deck2.paste(cmc, (270 * (nstep + 1) - 15 * len(card.cost),8), mask=cmc)
+        deck2.paste(cmc, (270 * (nstep + 1) - 15 * len(card.cost), 8), mask=cmc)
         adjustcmc = False
     else:
         deck.paste(cmc, (280 - 15 * (len(card.cost) + 1), 8 + 34 * nstep), mask=cmc)
@@ -181,11 +181,11 @@ Hexgradient = Image.new('L', (1, 255))
 
 #map the gradient
 for x in range(64):
-    Hexgradient.putpixel((0, x),254)
+    Hexgradient.putpixel((0, x), 254)
 for x in range(64):
     Hexgradient.putpixel((0, 64 + x), 254 - x)
 for x in range(128):
-    Hexgradient.putpixel((0, 127 + x),190 - int(1.5 * x))
+    Hexgradient.putpixel((0, 127 + x), 190 - int(1.5 * x))
 
 # create a horizontal gradient...
 gradient = Image.new('L', (255, 1))
@@ -224,7 +224,7 @@ def main(filename):
         fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
         title = Image.new("RGB", (219, 35), "black")
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((10, 8), os.path.basename(str(filename))[0:-4],(250, 250, 250), font=fnt_title)
+        drawtitle.text((10, 8), os.path.basename(str(filename))[0:-4], (250, 250, 250), font=fnt_title)
     elif deck_list.game == decklist.HEX:
         fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 16)
         fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 18)
@@ -232,11 +232,10 @@ def main(filename):
         nametitle = str(filename)[0:-4]
         nshard = 0
         for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
-            #print nametitle,nshard
             if nametitle.find(shard) != -1:
-                nametitle = nametitle.replace(shard,'')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard + '.png')).resize((20, 20))
-                title.paste(newshard,(10 + nshard * 20, 7))
+                nametitle = nametitle.replace(shard, '')
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((20, 20))
+                title.paste(newshard, (10 + nshard * 20, 7))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
@@ -305,7 +304,7 @@ def main(filename):
                 deck.paste(sideboard, (0, 34 * nstep))
                 #for scrolling decklist
                 sideboard2 = sideboard.crop((0, 0, 270, 34))
-                deck2.paste(sideboard2, (270 * nstep,0))
+                deck2.paste(sideboard2, (270 * nstep, 0))
                 nstep = nstep + 1
                 for card in deck_list.sideboard:
                     draw_mtg_card(card, nstep)
@@ -332,7 +331,7 @@ def main(filename):
                 bkgd.paste(img, (0, 0), mask=img)
 
                 cut = bkgd.crop((xtopPKMN, ytopPKMN + 90, xbotPKMN - 10, ybotPKMN + 100))
-                cut = cut.resize((deckwidth,34))
+                cut = cut.resize((deckwidth, 34))
 
                 draw = ImageDraw.Draw(cut)
                 #create text outline

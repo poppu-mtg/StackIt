@@ -235,7 +235,7 @@ def scryfall_mtgo(cardname, id):
 
 def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
-    text = text.encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
+    text = text.encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
     return text
 
 def store(url, filename):
