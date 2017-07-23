@@ -14,9 +14,9 @@ from PIL import Image, ImageTk
 class ScrollIt():
 
     def __init__(self):
-        self.image1 = Image.open(mGui.btn2text.get()[9:]+'-scroll.png')
+        self.image1 = Image.open(mGui.btn2text.get()[9:] + '-scroll.png')
         w1,h1 = self.image1.size
-        self.imagefull = Image.new("RGB",(w1*2,h1),"black")
+        self.imagefull = Image.new("RGB",(w1 * 2,h1),"black")
         self.imagefull.paste(self.image1,(0, 0))
         self.imagefull.paste(self.image1,(w1, 0))
 
@@ -68,12 +68,12 @@ def OpenPro1():
     canvas = Canvas(novi, width = 350, height = 1000)
     canvas.pack(expand = YES, fill = BOTH)
     #gif1 = PhotoImage(file = 'image.gif')
-    gif1=ImageTk.PhotoImage(Image.open(deckname[:-4]+'.png'))
+    gif1=ImageTk.PhotoImage(Image.open(deckname[:-4] + '.png'))
     canvas.create_image(50, 10, image = gif1, anchor = NW)
     #assigned the gif1 to the canvas object
     canvas.gif1 = gif1
 
-    mGui.btn2text.set('BannerIt '+deckname[:-4])
+    mGui.btn2text.set('BannerIt ' + deckname[:-4])
     mGui.Button_2.config(state='active')
 
 def OpenPro2():

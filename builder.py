@@ -56,12 +56,12 @@ def GenerateCMC(name, cost):
                 tap = tap0.resize((16, 16))
                 cmc.paste(tap, (15 * n, 0), mask=tap)
             else:
-                if (len(cost) > n + 1) and (cost[n] == '1') and (check9.find(cost[n+1]) != -1):
-                    finalcost = cost[n]+cost[n+1]
+                if (len(cost) > n + 1) and (cost[n] == '1') and (check9.find(cost[ n+ 1]) != -1):
+                    finalcost = cost[n] + cost[n + 1]
                     greaterthan9 = True
                 else:
                     finalcost = cost[n]
-                symbol = os.path.join(globals.RESOURCES_PATH, 'mana', 'Mana_'+finalcost+'.png')
+                symbol = os.path.join(globals.RESOURCES_PATH, 'mana', 'Mana_' + finalcost + '.png')
 
                 tap0 = Image.open(symbol)
                 if tap0.mode != 'RGBA':
@@ -91,12 +91,12 @@ def draw_hex_card(name, guid, quantity, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
-    draw.text((8, 6),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
-    draw.text((6, 8),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
-    draw.text((8, 8),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
+    draw.text((6, 6),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
+    draw.text((8, 6),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
+    draw.text((6, 8),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
+    draw.text((8, 8),str(quantity) + '  ' + name,(0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7),str(quantity)+'  '+name,(250, 250, 250), font=fnt)
+    draw.text((7, 7),str(quantity) + '  ' + name,(250, 250, 250), font=fnt)
 
     deck.paste(cut, (50, 35 * nstep))
 
@@ -130,18 +130,18 @@ def draw_mtg_card(card, nstep):
     bkgd.paste(img, (0, 0), mask=img)
 
     if isAftermath == True:
-        cut = bkgd.crop((xtop+12, ytop+55, xbot, ybot+55))
+        cut = bkgd.crop((xtop + 12, ytop + 55, xbot, ybot + 55))
     else:
-        cut = bkgd.crop((xtop+12, ytop+125, xbot, ybot+125))
+        cut = bkgd.crop((xtop + 12, ytop + 125, xbot, ybot + 125))
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
-    draw.text((8, 6), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
-    draw.text((6, 8), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
-    draw.text((8, 8), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
+    draw.text((6, 6), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
+    draw.text((8, 6), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
+    draw.text((6, 8), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
+    draw.text((8, 8), str(card.quantity) + '  ' + card.name,(0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7), str(card.quantity)+'  '+card.name,(250, 250, 250), font=fnt)
+    draw.text((7, 7), str(card.quantity) + '  ' + card.name,(250, 250, 250), font=fnt)
 
     cmc, adjustcmc = GenerateCMC(card.name, card.cost)
 
@@ -149,19 +149,19 @@ def draw_mtg_card(card, nstep):
     deck.paste(cut, (0, 34 * nstep))
     #for scrolling decklist
     tmpwidth,tmpheight = cut.size
-    cut2 = cut.crop((0, 0,tmpwidth-10,tmpheight))
+    cut2 = cut.crop((0, 0,tmpwidth - 10,tmpheight))
     deck2.paste(cut2, (270 * nstep, 0))
 
     #adjust cmc size to reflex manacost greater than 9
     if adjustcmc:
-        deck.paste(cmc, (280-15*len(card.cost),8+34*nstep), mask=cmc)
+        deck.paste(cmc, (280 - 15 * len(card.cost),8 + 34 * nstep), mask=cmc)
         #for scrolling decklist
-        deck2.paste(cmc, (270*(nstep+1)-15*len(card.cost),8), mask=cmc)
+        deck2.paste(cmc, (270 * (nstep + 1) - 15 * len(card.cost),8), mask=cmc)
         adjustcmc = False
     else:
-        deck.paste(cmc, (280-15*(len(card.cost)+1),8+34*nstep), mask=cmc)
+        deck.paste(cmc, (280 - 15 * (len(card.cost) + 1), 8 + 34 * nstep), mask=cmc)
         #for scrolling decklist
-        deck2.paste(cmc, (270*(nstep+1)-15*(len(card.cost)+1),8), mask=cmc)
+        deck2.paste(cmc, (270 * (nstep + 1) - 15 * (len(card.cost) + 1), 8), mask=cmc)
 
 globals.mkcachepaths()
 
@@ -183,20 +183,14 @@ Hexgradient = Image.new('L', (1, 255))
 for x in range(64):
     Hexgradient.putpixel((0, x),254)
 for x in range(64):
-    Hexgradient.putpixel((0, 64+x),254-x)
+    Hexgradient.putpixel((0, 64 + x), 254 - x)
 for x in range(128):
-    Hexgradient.putpixel((0, 127+x),190-int(1.5*x))
+    Hexgradient.putpixel((0, 127 + x),190 - int(1.5 * x))
 
 # create a horizontal gradient...
 gradient = Image.new('L', (255, 1))
 
 #map the gradient
-#for x in range(64):
-#    gradient.putpixel((x,0),254)
-#for x in range(64):
-#    gradient.putpixel((63+x,0),max(254-x,0))
-#for x in range(128):
-#    gradient.putpixel((127+x,0),max(int(190-1.5*x),0))
 for x in range(128):
     gradient.putpixel((x, 0), int(1.5 * x))
 for x in range(64):
@@ -241,8 +235,8 @@ def main(filename):
             #print nametitle,nshard
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard,'')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard+'.png')).resize((20, 20))
-                title.paste(newshard,(10+nshard*20, 7))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard + '.png')).resize((20, 20))
+                title.paste(newshard,(10 + nshard * 20, 7))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
@@ -265,16 +259,16 @@ def main(filename):
     #define the size of the canvas, incl. space for the title header
     if deck_list.game == decklist.MTG:
         deckwidth = 280
-        deckheight = 34*(ncount+1)
+        deckheight = 34 * (ncount + 1)
         #for scrolling decklist
-        deckwidth2 = 270*(ncount+1)
+        deckwidth2 = 270 * (ncount + 1)
         deckheight2 = 34
     elif deck_list.game == decklist.POKEMON:
         deckwidth = 219
-        deckheight = 35*(ncount+1)
+        deckheight = 35 * (ncount + 1)
     elif deck_list.game == decklist.HEX:
         deckwidth = 320
-        deckheight = 35*(ncount+1)
+        deckheight = 35 * (ncount + 1)
 
     #reset the sideboard marker
     isSideboard = 0
@@ -308,10 +302,10 @@ def main(filename):
                 nstep = nstep + 1
 
             if doSideboard:
-                deck.paste(sideboard, (0, 34*nstep))
+                deck.paste(sideboard, (0, 34 * nstep))
                 #for scrolling decklist
                 sideboard2 = sideboard.crop((0, 0, 270, 34))
-                deck2.paste(sideboard2, (270*nstep,0))
+                deck2.paste(sideboard2, (270 * nstep,0))
                 nstep = nstep + 1
                 for card in deck_list.sideboard:
                     draw_mtg_card(card, nstep)
@@ -337,7 +331,7 @@ def main(filename):
                 bkgd = Image.new("RGB", img.size, "black")
                 bkgd.paste(img, (0, 0), mask=img)
 
-                cut = bkgd.crop((xtopPKMN, ytopPKMN+90, xbotPKMN-10, ybotPKMN+100))
+                cut = bkgd.crop((xtopPKMN, ytopPKMN + 90, xbotPKMN - 10, ybotPKMN + 100))
                 cut = cut.resize((deckwidth,34))
 
                 draw = ImageDraw.Draw(cut)
@@ -352,10 +346,10 @@ def main(filename):
                 #place the cropped picture of the current card
                 deck.paste(cut, (0, 35 * nstep))
 
-                nstep = nstep+1
+                nstep = nstep + 1
 
     elif deck_list.game == decklist.HEX:
-        banner = Image.new("RGB", (deckheight-35, 50), "black")
+        banner = Image.new("RGB", (deckheight - 35, 50), "black")
         if len(deck_list.commander) > 0:
             cmdr = deck_list.commander[0]
             guid = cmdr.collector_num
@@ -402,7 +396,7 @@ def main(filename):
     elif deck_list.game == decklist.POKEMON:
         deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
     elif deck_list.game == decklist.HEX:
-        deck = deck.crop((0, 0, deckwidth-22, deckheight))
+        deck = deck.crop((0, 0, deckwidth - 22, deckheight))
 
     output_path = str(filename)[0:-4] + ".png"
     deck.save(output_path)
