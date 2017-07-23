@@ -74,7 +74,7 @@ def GenerateCMC(name, cost):
 
 def draw_hex_card(name, guid, quantity, nstep):
     lookupScan = scraper.download_scanHex(name, guid)
-    
+
     img = Image.open(lookupScan)
     img = img.crop((39,130,309,164))
 
@@ -113,7 +113,7 @@ def draw_mtg_card(card, nstep):
         lookupScan = scraper.download_scan(card.name, card.set, card.collector_num)
 
     img = Image.open(lookupScan)
-    if (card.name.find(" // ") != -1) and (isAftermath == False): 
+    if (card.name.find(" // ") != -1) and (isAftermath == False):
         img = img.rotate(-90)
 
     #check if im has Alpha band...
@@ -278,7 +278,7 @@ def main(filename):
 
     #reset the sideboard marker
     isSideboard = 0
-    
+
     global deck
     deck = Image.new("RGB", (deckwidth, deckheight), "white")
     #for scrolling decklist
@@ -321,7 +321,7 @@ def main(filename):
         for card in deck_list.mainboard:
                 quantity = card.quantity
                 lookupScan, displayname = scraper.download_scanPKMN(card.name, card.set, card.collector_num)
-                
+
                 img = Image.open(lookupScan)
 
                 #check if im has Alpha band...
@@ -395,7 +395,7 @@ def main(filename):
             for card in deck_list.sideboard:
                 draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
                 nstep = nstep + 1
-                
+
     if deck_list.game == decklist.MTG:
         deck = deck.crop((0, 0, deckwidth - 10, deckheight))
         deck2 = deck2.crop((0, 0, deckwidth2, deckheight2 - 2))
@@ -403,7 +403,7 @@ def main(filename):
         deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
     elif deck_list.game == decklist.HEX:
         deck = deck.crop((0, 0, deckwidth-22, deckheight))
-    
+
     output_path = str(filename)[0:-4] + ".png"
     deck.save(output_path)
     #for scrolling decklist

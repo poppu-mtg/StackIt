@@ -33,7 +33,7 @@ class ScrollIt():
         self.x00,self.y00 = self.canvas1.coords(self.item)
 #        self.next_image()
         self.canvas1.bind('<Button-1>', self.next_image)
-             
+
     def next_image(self,even=None):
 
         x0,y0 = self.canvas1.coords(self.item)
@@ -41,10 +41,10 @@ class ScrollIt():
             self.canvas1.coords(self.item, (self.x00,y0))
         else:
             self.canvas1.move(self.item, -3, 0)
-            
+
         self.canvas1.after(60, self.next_image)
 
-        
+
 def OpenPro1():
     if mGui.Listname.get() != '':
         deckname = mGui.Listname.get()
@@ -78,7 +78,7 @@ def OpenPro1():
 
 def OpenPro2():
     ScrollIt()
-    
+
 
 mGui = Tk()
 mGui.configure(background='white')
