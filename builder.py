@@ -19,6 +19,8 @@ from globals import Card, specmana, aftermath
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 
+FILTER = Image.LANCZOS
+
 # Sizes
 INNER_MTG_MANA_COST_IMAGE_SIZE = 15
 OUTER_MTG_MANA_COST_IMAGE_SIZE = 16
@@ -128,7 +130,7 @@ def GenerateCMC(name, cost):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE))
+                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE), FILTER)
                 cmc.paste(tap, (INNER_MTG_MANA_COST_IMAGE_SIZE * n, 0), mask=tap)
             else:
                 if (len(cost) > n + 1) and (cost[n] == '1') and (check9.find(cost[ n+ 1]) != -1):
@@ -142,7 +144,7 @@ def GenerateCMC(name, cost):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE))
+                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE), FILTER)
                 cmc.paste(tap, (INNER_MTG_MANA_COST_IMAGE_SIZE * n, 0), mask=tap)
         cmc.save(lookupCMC)
     return cmc, adjustcmc
@@ -154,7 +156,7 @@ def draw_hex_card(name, guid, quantity, nstep):
     img = img.crop(HEX_IMAGE_CROP)
 
     #resize the gradient to the size of im...
-    alpha = gradient.resize(img.size)
+    alpha = gradient.resize(img.size, FILTER)
 
     #put alpha in the alpha band of im...
     img.putalpha(alpha)
@@ -197,7 +199,7 @@ def draw_mtg_card(card, nstep):
         img = img.convert('RGBA')
 
     #resize the gradient to the size of im...
-    alpha = gradient.resize(img.size)
+    alpha = gradient.resize(img.size, FILTER)
 
     #put alpha in the alpha band of im...
     img.putalpha(alpha)
@@ -300,7 +302,7 @@ def main(filename):
         for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard, '')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE), FILTER)
                 title.paste(newshard, (HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
@@ -324,7 +326,7 @@ def main(filename):
     #define the size of the canvas, incl. space for the title header
     if deck_list.game == decklist.MTG:
         deckwidth = DECK_WIDTH
-        deckheight = (INNER_ENTRY_HEIGHT) * (ncount + 1)
+        deckheight = INNER_ENTRY_HEIGHT * (ncount + 1)
         #for scrolling decklist
         deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
         deckheight2 = INNER_ENTRY_HEIGHT
@@ -388,7 +390,7 @@ def main(filename):
                     img = img.convert('RGBA')
 
                 #resize the gradient to the size of im...
-                alpha = gradient.resize(img.size)
+                alpha = gradient.resize(img.size, FILTER)
 
                 #put alpha in the alpha band of im...
                 img.putalpha(alpha)
@@ -436,7 +438,7 @@ def main(filename):
                 mainguycut = mainguycut.convert('RGBA')
 
             #resize the gradient to the size of im...
-            alpha = Hexgradient.resize(mainguycut.size)
+            alpha = Hexgradient.resize(mainguycut.size, FILTER)
 
             #put alpha in the alpha band of im...
             mainguycut.putalpha(alpha)
