@@ -19,12 +19,87 @@ from globals import Card, specmana, aftermath
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 
+# Sizes
+INNER_MTG_MANA_COST_IMAGE_SIZE = 15
+OUTER_MTG_MANA_COST_IMAGE_SIZE = 16
+HEX_MANA_COST_IMAGE_SIZE = 20
+INNER_ENTRY_HEIGHT = 34
+OUTER_ENTRY_HEIGHT = 35
+DECK_WIDTH = 280
+HEX_DECK_WIDTH = 219
+HEX_MASTER_DECK_WIDTH = 320
+SCROLLING_DECK_WIDTH_ADJUSTMENT = 10
+SCROLLING_DECK_WIDTH = DECK_WIDTH - SCROLLING_DECK_WIDTH_ADJUSTMENT
+
+# Image Positioning
+HEX_MANA_COST_LEFT = 10
+HEX_MANA_COST_TOP = 7
+HEX_BANNER_TOP = 50
+SIDEBOARD_LEFT = 50
+MTG_CMC_OFFSET_TOP = 8
+
+# Crops
+HEX_IMAGE_CROP = (39, 130, 309, 164)
+HEX_MAINGUY_CROP = (134, 55, 185, 275)
+MTG_BACKGROUND_X_TOP_OFFSET = 12
+MTG_BACKGROUND_Y_OFFSET = 125
+MTG_BACKGROUND_Y_OFFSET_AFTERMATH = 55
+POKEMON_BACKGROUND_OFFSET_Y_TOP = 90
+POKEMON_BACKGROUND_OFFSET_X_BOTTOM = 10
+POKEMON_BACKGROUND_OFFSET_Y_BOTTOM = 100
+MTG_WIDTH_CROP_RIGHT = 10
+POKEMON_WIDTH_CROP_RIGHT = 10
+HEX_WIDTH_CROP_RIGHT = 22
+
+# Colors
+BLACK = (0, 0, 0)
+NEARLY_WHITE = (250, 250, 250)
+RGB_MAX_0 = 255
+RGB_MAX_1 = 256
+HALF = int(RGB_MAX_1 / 2)
+BAD_HALF = int(RGB_MAX_0 / 2)
+QUARTER = int(RGB_MAX_1 / 4)
+BAD_THREE_QUARTERS = 190
+
+# Text Positioning
+TEXT_LEFT, TEXT_TOP = 7, 7
+POKEMON_TEXT_LEFT, POKEMON_TEXT_TOP = 7, 12
+MTG_TITLE_POSITION = (10, 7)
+POKEMON_TITLE_POSITION = (10, 8)
+TEXT_PASTE_LEFT = 50
+HEX_TITLE_LEFT = 15
+HEX_TITLE_TOP = 12
+SIDEBOARD_TITLE_POSITION = (10, 7)
+HEX_BANNER_POSITION = (15, 15)
+
+# Type Sizes
+MTG_FONT_SIZE = 14
+MTG_TITLE_FONT_SIZE = 18
+HEX_FONT_SIZE = 16
+HEX_TITLE_FONT_SIZE = 18
+POKEMON_FONT_SIZE = 10
+POKEMON_TITLE_FONT_SIZE = 14
+
+# Rotation
+ROTATE_RIGHT = 90
+ROTATE_LEFT = -90
+
+#some position initialization
+X_TOP = 8
+X_BOTTOM = 304
+Y_TOP = 11.5
+Y_BOTTOM = 45.25
+
+X_TOP_POKEMON = 8
+X_BOTTOM_POKEMON = 237
+Y_TOP_POKEMON = 11.5
+Y_BOTTOM_POKEMON = 45.25
+
 def GenerateCMC(name, cost):
     check9 = '0123456'
     adjustcmc = False
-    cmc = Image.new('RGBA', (16 * len(cost), 16))
+    cmc = Image.new('RGBA', (OUTER_MTG_MANA_COST_IMAGE_SIZE * len(cost), OUTER_MTG_MANA_COST_IMAGE_SIZE))
     diskcost = cost.strip().replace('*', '_').replace('/', '-')
-    # lookupCMC = os.path.join('CmcCache', '{cost}.png'.format(cost=diskcost))
     lookupCMC = os.path.join(globals.CMC_PATH, '{cost}.png'.format(cost=diskcost))
     if os.path.exists(lookupCMC):
         tap0 = Image.open(lookupCMC)
@@ -53,8 +128,8 @@ def GenerateCMC(name, cost):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((16, 16))
-                cmc.paste(tap, (15 * n, 0), mask=tap)
+                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE))
+                cmc.paste(tap, (INNER_MTG_MANA_COST_IMAGE_SIZE * n, 0), mask=tap)
             else:
                 if (len(cost) > n + 1) and (cost[n] == '1') and (check9.find(cost[ n+ 1]) != -1):
                     finalcost = cost[n] + cost[n + 1]
@@ -67,8 +142,8 @@ def GenerateCMC(name, cost):
                 if tap0.mode != 'RGBA':
                     tap0 = tap0.convert('RGBA')
 
-                tap = tap0.resize((16, 16))
-                cmc.paste(tap, (15 * n, 0), mask=tap)
+                tap = tap0.resize((OUTER_MTG_MANA_COST_IMAGE_SIZE, OUTER_MTG_MANA_COST_IMAGE_SIZE))
+                cmc.paste(tap, (INNER_MTG_MANA_COST_IMAGE_SIZE * n, 0), mask=tap)
         cmc.save(lookupCMC)
     return cmc, adjustcmc
 
@@ -76,7 +151,7 @@ def draw_hex_card(name, guid, quantity, nstep):
     lookupScan = scraper.download_scanHex(name, guid)
 
     img = Image.open(lookupScan)
-    img = img.crop((39, 130, 309, 164))
+    img = img.crop(HEX_IMAGE_CROP)
 
     #resize the gradient to the size of im...
     alpha = gradient.resize(img.size)
@@ -91,14 +166,15 @@ def draw_hex_card(name, guid, quantity, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
-    draw.text((8, 6), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
-    draw.text((6, 8), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
-    draw.text((8, 8), str(quantity) + '  ' + name, (0, 0, 0), font=fnt)
+    text = str(quantity) + '  ' + name
+    draw.text((TEXT_LEFT - 1, TEXT_TOP - 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT + 1, TEXT_TOP - 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT - 1, TEXT_TOP + 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT + 1, TEXT_TOP + 1), text, BLACK, font=fnt)
     #enter text
-    draw.text((7, 7), str(quantity) + '  ' + name, (250, 250, 250), font=fnt)
+    draw.text((TEXT_LEFT, TEXT_TOP), text, NEARLY_WHITE, font=fnt)
 
-    deck.paste(cut, (50, 35 * nstep))
+    deck.paste(cut, (TEXT_PASTE_LEFT, (OUTER_ENTRY_HEIGHT) * nstep))
 
 def draw_mtg_card(card, nstep):
 
@@ -114,7 +190,7 @@ def draw_mtg_card(card, nstep):
 
     img = Image.open(lookupScan)
     if (card.name.find(" // ") != -1) and (isAftermath == False):
-        img = img.rotate(-90)
+        img = img.rotate(ROTATE_LEFT)
 
     #check if im has Alpha band...
     if img.mode != 'RGBA':
@@ -130,73 +206,63 @@ def draw_mtg_card(card, nstep):
     bkgd.paste(img, (0, 0), mask=img)
 
     if isAftermath == True:
-        cut = bkgd.crop((xtop + 12, ytop + 55, xbot, ybot + 55))
+        cut = bkgd.crop((X_TOP + MTG_BACKGROUND_X_TOP_OFFSET, Y_TOP + MTG_BACKGROUND_Y_OFFSET_AFTERMATH, X_BOTTOM, Y_BOTTOM + MTG_BACKGROUND_Y_OFFSET_AFTERMATH))
     else:
-        cut = bkgd.crop((xtop + 12, ytop + 125, xbot, ybot + 125))
+        cut = bkgd.crop((X_TOP + MTG_BACKGROUND_X_TOP_OFFSET, Y_TOP + MTG_BACKGROUND_Y_OFFSET, X_BOTTOM, Y_BOTTOM + MTG_BACKGROUND_Y_OFFSET))
 
     draw = ImageDraw.Draw(cut)
+    text = str(card.quantity) + '  ' + card.name
     #create text outline
-    draw.text((6, 6), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
-    draw.text((8, 6), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
-    draw.text((6, 8), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
-    draw.text((8, 8), str(card.quantity) + '  ' + card.name, (0, 0, 0), font=fnt)
+    draw.text((TEXT_LEFT - 1, TEXT_TOP - 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT + 1, TEXT_TOP - 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT - 1, TEXT_TOP + 1), text, BLACK, font=fnt)
+    draw.text((TEXT_LEFT + 1, TEXT_TOP + 1), text, BLACK, font=fnt)
     #enter text
-    draw.text((7, 7), str(card.quantity) + '  ' + card.name, (250, 250, 250), font=fnt)
+    draw.text((TEXT_LEFT, TEXT_TOP), text, NEARLY_WHITE, font=fnt)
 
     cmc, adjustcmc = GenerateCMC(card.name, card.cost)
 
     #place the cropped picture of the current card
-    deck.paste(cut, (0, 34 * nstep))
+    deck.paste(cut, (0, INNER_ENTRY_HEIGHT * nstep))
     #for scrolling decklist
     tmpwidth, tmpheight = cut.size
-    cut2 = cut.crop((0, 0, tmpwidth - 10, tmpheight))
-    deck2.paste(cut2, (270 * nstep, 0))
+    cut2 = cut.crop((0, 0, tmpwidth - SCROLLING_DECK_WIDTH_ADJUSTMENT, tmpheight))
+    deck2.paste(cut2, (SCROLLING_DECK_WIDTH * nstep, 0))
 
     #adjust cmc size to reflex manacost greater than 9
     if adjustcmc:
-        deck.paste(cmc, (280 - 15 * len(card.cost), 8 + 34 * nstep), mask=cmc)
+        deck.paste(cmc, (DECK_WIDTH - INNER_MTG_MANA_COST_IMAGE_SIZE * len(card.cost), MTG_CMC_OFFSET_TOP + INNER_ENTRY_HEIGHT * nstep), mask=cmc)
         #for scrolling decklist
-        deck2.paste(cmc, (270 * (nstep + 1) - 15 * len(card.cost), 8), mask=cmc)
+        deck2.paste(cmc, (SCROLLING_DECK_WIDTH * (nstep + 1) - INNER_MTG_MANA_COST_IMAGE_SIZE * len(card.cost), MTG_CMC_OFFSET_TOP), mask=cmc)
         adjustcmc = False
     else:
-        deck.paste(cmc, (280 - 15 * (len(card.cost) + 1), 8 + 34 * nstep), mask=cmc)
+        deck.paste(cmc, (DECK_WIDTH - INNER_MTG_MANA_COST_IMAGE_SIZE * (len(card.cost) + 1), MTG_CMC_OFFSET_TOP + INNER_ENTRY_HEIGHT * nstep), mask=cmc)
         #for scrolling decklist
-        deck2.paste(cmc, (270 * (nstep + 1) - 15 * (len(card.cost) + 1), 8), mask=cmc)
+        deck2.paste(cmc, (SCROLLING_DECK_WIDTH * (nstep + 1) - INNER_MTG_MANA_COST_IMAGE_SIZE * (len(card.cost) + 1), MTG_CMC_OFFSET_TOP), mask=cmc)
 
 globals.mkcachepaths()
 
-#some position initialization
-xtop = 8
-xbot = 304
-ytop = 11.5
-ybot = 45.25
-
-xtopPKMN = 8
-xbotPKMN = 237
-ytopPKMN = 11.5
-ybotPKMN = 45.25
-
 # create a horizontal gradient...
-Hexgradient = Image.new('L', (1, 255))
+Hexgradient = Image.new('L', (1, RGB_MAX_0))
 
 #map the gradient
-for x in range(64):
-    Hexgradient.putpixel((0, x), 254)
-for x in range(64):
-    Hexgradient.putpixel((0, 64 + x), 254 - x)
-for x in range(128):
-    Hexgradient.putpixel((0, 127 + x), 190 - int(1.5 * x))
+for x in range(QUARTER):
+    Hexgradient.putpixel((0, x), RGB_MAX_0)
+for x in range(QUARTER):
+    Hexgradient.putpixel((0, QUARTER + x), RGB_MAX_0 - x)
+for x in range(HALF):
+    Hexgradient.putpixel((0, BAD_HALF + x), BAD_THREE_QUARTERS - int(1.5 * x))
 
 # create a horizontal gradient...
-gradient = Image.new('L', (255, 1))
+gradient = Image.new('L', (RGB_MAX_0, 1))
 
 #map the gradient
-for x in range(128):
+for x in range(HALF):
     gradient.putpixel((x, 0), int(1.5 * x))
-for x in range(64):
-    gradient.putpixel((127 + x, 0), 190 + x)
-for x in range(64):
-    gradient.putpixel((190 + x, 0), 254)
+for x in range(QUARTER):
+    gradient.putpixel((BAD_HALF + x, 0), BAD_THREE_QUARTERS + x)
+for x in range(QUARTER):
+    gradient.putpixel((BAD_THREE_QUARTERS + x, 0), RGB_MAX_0 - 1)
 
 def main(filename):
     doSideboard = config.Get('options', 'display_sideboard')
@@ -214,31 +280,31 @@ def main(filename):
     # create a header with the deck's name
     global fnt
     if deck_list.game == decklist.MTG:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 14)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), 18)
-        title = Image.new("RGB", (280, 34), "black")
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_TITLE_FONT_SIZE)
+        title = Image.new("RGB", (DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((10, 7), os.path.basename(str(filename))[0:-4], (250, 250, 250), font=fnt_title)
+        drawtitle.text(MTG_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.POKEMON:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 10)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), 14)
-        title = Image.new("RGB", (219, 35), "black")
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_TITLE_FONT_SIZE)
+        title = Image.new("RGB", (HEX_DECK_WIDTH, OUTER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((10, 8), os.path.basename(str(filename))[0:-4], (250, 250, 250), font=fnt_title)
+        drawtitle.text(POKEMON_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.HEX:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 16)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 18)
-        title = Image.new("RGB", (320, 34), "black")
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_TITLE_FONT_SIZE)
+        title = Image.new("RGB", (HEX_MASTER_DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
         for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard, '')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((20, 20))
-                title.paste(newshard, (10 + nshard * 20, 7))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE))
+                title.paste(newshard, (HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
+        drawtitle.text((HEX_TITLE_LEFT + nshard * HEX_MANA_COST_IMAGE_SIZE, HEX_TITLE_TOP), os.path.basename(nametitle), NEARLY_WHITE, font=fnt_title)
 
     ncountMB = len(deck_list.mainboard)
     ncountSB = len(deck_list.sideboard)
@@ -247,27 +313,27 @@ def main(filename):
         doSideboard = False
     if doSideboard:
         #create a Sideboard partition
-        sideboard = Image.new("RGB", (280, 34), "black")
+        sideboard = Image.new("RGB", (DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(sideboard)
         sideboard_name = "Sideboard"
         if deck_list.game == decklist.HEX:
             sideboard_name = "Reserves"
-        drawtitle.text((10, 7), sideboard_name, (250, 250, 250), font=fnt_title)
+        drawtitle.text(SIDEBOARD_TITLE_POSITION, sideboard_name, NEARLY_WHITE, font=fnt_title)
         ncount += ncountSB + 1
 
     #define the size of the canvas, incl. space for the title header
     if deck_list.game == decklist.MTG:
-        deckwidth = 280
-        deckheight = 34 * (ncount + 1)
+        deckwidth = DECK_WIDTH
+        deckheight = (INNER_ENTRY_HEIGHT) * (ncount + 1)
         #for scrolling decklist
-        deckwidth2 = 270 * (ncount + 1)
-        deckheight2 = 34
+        deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
+        deckheight2 = INNER_ENTRY_HEIGHT
     elif deck_list.game == decklist.POKEMON:
-        deckwidth = 219
-        deckheight = 35 * (ncount + 1)
+        deckwidth = HEX_DECK_WIDTH
+        deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
     elif deck_list.game == decklist.HEX:
-        deckwidth = 320
-        deckheight = 35 * (ncount + 1)
+        deckwidth = HEX_MASTER_DECK_WIDTH
+        deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
 
     #reset the sideboard marker
     isSideboard = 0
@@ -280,7 +346,7 @@ def main(filename):
 
     deck.paste(title, (0, 0))
     #for scrolling decklist
-    title2 = title.crop((0, 0, 270, 34))
+    title2 = title.crop((0, 0, SCROLLING_DECK_WIDTH, INNER_ENTRY_HEIGHT))
     deck2.paste(title2, (0, 0))
 
     #now read the decklist
@@ -301,10 +367,10 @@ def main(filename):
                 nstep = nstep + 1
 
             if doSideboard:
-                deck.paste(sideboard, (0, 34 * nstep))
+                deck.paste(sideboard, (0, INNER_ENTRY_HEIGHT * nstep))
                 #for scrolling decklist
-                sideboard2 = sideboard.crop((0, 0, 270, 34))
-                deck2.paste(sideboard2, (270 * nstep, 0))
+                sideboard2 = sideboard.crop((0, 0, SCROLLING_DECK_WIDTH, INNER_ENTRY_HEIGHT))
+                deck2.paste(sideboard2, (SCROLLING_DECK_WIDTH * nstep, 0))
                 nstep = nstep + 1
                 for card in deck_list.sideboard:
                     draw_mtg_card(card, nstep)
@@ -330,39 +396,40 @@ def main(filename):
                 bkgd = Image.new("RGB", img.size, "black")
                 bkgd.paste(img, (0, 0), mask=img)
 
-                cut = bkgd.crop((xtopPKMN, ytopPKMN + 90, xbotPKMN - 10, ybotPKMN + 100))
-                cut = cut.resize((deckwidth, 34))
+                cut = bkgd.crop((X_TOP_POKEMON, Y_TOP_POKEMON + POKEMON_BACKGROUND_OFFSET_Y_TOP, X_BOTTOM_POKEMON - POKEMON_BACKGROUND_OFFSET_X_BOTTOM, Y_BOTTOM_POKEMON + POKEMON_BACKGROUND_OFFSET_Y_BOTTOM))
+                cut = cut.resize((deckwidth, INNER_ENTRY_HEIGHT))
 
                 draw = ImageDraw.Draw(cut)
                 #create text outline
-                draw.text((6, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-                draw.text((8, 11), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-                draw.text((6, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
-                draw.text((8, 13), str(quantity) + '  ' + displayname, (0, 0, 0), font=fnt)
+                text = str(quantity) + '  ' + displayname
+                draw.text((POKEMON_TEXT_LEFT - 1, POKEMON_TEXT_TOP - 1), text, BLACK, font=fnt)
+                draw.text((POKEMON_TEXT_LEFT + 1, POKEMON_TEXT_TOP - 1), text, BLACK, font=fnt)
+                draw.text((POKEMON_TEXT_LEFT - 1, POKEMON_TEXT_TOP + 1), text, BLACK, font=fnt)
+                draw.text((POKEMON_TEXT_LEFT + 1, POKEMON_TEXT_TOP + 1), text, BLACK, font=fnt)
                 #enter text
-                draw.text((7, 12), str(quantity) + '  ' + displayname, (250, 250, 250), font=fnt)
+                draw.text((POKEMON_TEXT_LEFT, POKEMON_TEXT_TOP), text, NEARLY_WHITE, font=fnt)
 
                 #place the cropped picture of the current card
-                deck.paste(cut, (0, 35 * nstep))
+                deck.paste(cut, (0, OUTER_ENTRY_HEIGHT * nstep))
 
                 nstep = nstep + 1
 
     elif deck_list.game == decklist.HEX:
-        banner = Image.new("RGB", (deckheight - 35, 50), "black")
+        banner = Image.new("RGB", (deckheight - OUTER_ENTRY_HEIGHT, HEX_BANNER_TOP), "black")
         if len(deck_list.commander) > 0:
             cmdr = deck_list.commander[0]
             guid = cmdr.collector_num
             typeCM = cmdr.set
 
             drawbanner = ImageDraw.Draw(banner)
-            drawbanner.text((15, 15), str(cmdr.name), (250, 250, 250), font=fnt_title)
+            drawbanner.text(HEX_BANNER_POSITION, str(cmdr.name), NEARLY_WHITE, font=fnt_title)
 
             lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
 
             mainguyImg = Image.open(lookupScan)
-            mainguycut = mainguyImg.crop((135, 55, 185, 275))
+            mainguycut = mainguyImg.crop(HEX_MAINGUY_CROP)
 
-            banner = banner.rotate(90, expand=True)
+            banner = banner.rotate(ROTATE_RIGHT, expand=True)
 
             #check if im has Alpha band...
             if mainguycut.mode != 'RGBA':
@@ -376,26 +443,26 @@ def main(filename):
 
             banner.paste(mainguycut, (0, 0), mask=mainguycut)
 
-            deck.paste(banner, (0, 35))
+            deck.paste(banner, (0, OUTER_ENTRY_HEIGHT))
 
         for card in deck_list.mainboard:
             draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
             nstep = nstep + 1
 
         if doSideboard:
-            deck.paste(sideboard, (50, 35 * nstep))
+            deck.paste(sideboard, (SIDEBOARD_LEFT, ENTRY_HEIGHT * nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
                 draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
                 nstep = nstep + 1
 
     if deck_list.game == decklist.MTG:
-        deck = deck.crop((0, 0, deckwidth - 10, deckheight))
+        deck = deck.crop((0, 0, deckwidth - MTG_WIDTH_CROP_RIGHT, deckheight))
         deck2 = deck2.crop((0, 0, deckwidth2, deckheight2 - 2))
     elif deck_list.game == decklist.POKEMON:
-        deck = deck.crop((0, 0, deckwidth - 10, 35 * nstep))
+        deck = deck.crop((0, 0, deckwidth - POKEMON_WIDTH_CROP_RIGHT, OUTER_ENTRY_HEIGHT * nstep))
     elif deck_list.game == decklist.HEX:
-        deck = deck.crop((0, 0, deckwidth - 22, deckheight))
+        deck = deck.crop((0, 0, deckwidth - HEX_WIDTH_CROP_RIGHT, deckheight))
 
     output_path = str(filename)[0:-4] + ".png"
     deck.save(output_path)
