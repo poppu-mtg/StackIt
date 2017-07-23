@@ -17,8 +17,8 @@ class ScrollIt():
         self.image1 = Image.open(mGui.btn2text.get()[9:]+'-scroll.png')
         w1,h1 = self.image1.size
         self.imagefull = Image.new("RGB",(w1*2,h1),"black")
-        self.imagefull.paste(self.image1,(0,0))
-        self.imagefull.paste(self.image1,(w1,0))
+        self.imagefull.paste(self.image1,(0, 0))
+        self.imagefull.paste(self.image1,(w1, 0))
 
         self.photo1 = ImageTk.PhotoImage(self.imagefull)
         width1 = self.photo1.width()
@@ -86,7 +86,7 @@ mGui.configure(background='white')
 mGui.title('  StackIt')
 mGui.geometry("350x565")
 
-tkimage = ImageTk.PhotoImage(Image.open(os.path.join(globals.RESOURCES_PATH, 'StackIt-Logo.png')).resize((345,87)))
+tkimage = ImageTk.PhotoImage(Image.open(os.path.join(globals.RESOURCES_PATH, 'StackIt-Logo.png')).resize((345, 87)))
 mGui.Logo = Label(mGui, image=tkimage)
 mGui.Logo.grid(row=0, column=0, columnspan=3)
 

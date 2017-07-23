@@ -76,7 +76,7 @@ def draw_hex_card(name, guid, quantity, nstep):
     lookupScan = scraper.download_scanHex(name, guid)
 
     img = Image.open(lookupScan)
-    img = img.crop((39,130,309,164))
+    img = img.crop((39, 130, 309, 164))
 
     #resize the gradient to the size of im...
     alpha = gradient.resize(img.size)
@@ -85,20 +85,20 @@ def draw_hex_card(name, guid, quantity, nstep):
     img.putalpha(alpha)
 
     bkgd = Image.new("RGB", img.size, "black")
-    bkgd.paste(img, (0,0), mask=img)
+    bkgd.paste(img, (0, 0), mask=img)
 
     cut = bkgd
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 6),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((6, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
-    draw.text((8, 8),str(quantity)+'  '+name,(0,0,0), font=fnt)
+    draw.text((6, 6),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
+    draw.text((8, 6),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
+    draw.text((6, 8),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
+    draw.text((8, 8),str(quantity)+'  '+name,(0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7),str(quantity)+'  '+name,(250,250,250), font=fnt)
+    draw.text((7, 7),str(quantity)+'  '+name,(250, 250, 250), font=fnt)
 
-    deck.paste(cut, (50,35*nstep))
+    deck.paste(cut, (50, 35 * nstep))
 
 def draw_mtg_card(card, nstep):
 
@@ -127,7 +127,7 @@ def draw_mtg_card(card, nstep):
     img.putalpha(alpha)
 
     bkgd = Image.new("RGB", img.size, "black")
-    bkgd.paste(img, (0,0), mask=img)
+    bkgd.paste(img, (0, 0), mask=img)
 
     if isAftermath == True:
         cut = bkgd.crop((xtop+12, ytop+55, xbot, ybot+55))
@@ -136,12 +136,12 @@ def draw_mtg_card(card, nstep):
 
     draw = ImageDraw.Draw(cut)
     #create text outline
-    draw.text((6, 6), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
-    draw.text((8, 6), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
-    draw.text((6, 8), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
-    draw.text((8, 8), str(card.quantity)+'  '+card.name,(0,0,0), font=fnt)
+    draw.text((6, 6), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
+    draw.text((8, 6), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
+    draw.text((6, 8), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
+    draw.text((8, 8), str(card.quantity)+'  '+card.name,(0, 0, 0), font=fnt)
     #enter text
-    draw.text((7, 7), str(card.quantity)+'  '+card.name,(250,250,250), font=fnt)
+    draw.text((7, 7), str(card.quantity)+'  '+card.name,(250, 250, 250), font=fnt)
 
     cmc, adjustcmc = GenerateCMC(card.name, card.cost)
 
@@ -149,7 +149,7 @@ def draw_mtg_card(card, nstep):
     deck.paste(cut, (0, 34 * nstep))
     #for scrolling decklist
     tmpwidth,tmpheight = cut.size
-    cut2 = cut.crop((0,0,tmpwidth-10,tmpheight))
+    cut2 = cut.crop((0, 0,tmpwidth-10,tmpheight))
     deck2.paste(cut2, (270 * nstep, 0))
 
     #adjust cmc size to reflex manacost greater than 9
@@ -177,15 +177,15 @@ ytopPKMN = 11.5
 ybotPKMN = 45.25
 
 # create a horizontal gradient...
-Hexgradient = Image.new('L', (1,255))
+Hexgradient = Image.new('L', (1, 255))
 
 #map the gradient
 for x in range(64):
-    Hexgradient.putpixel((0,x),254)
+    Hexgradient.putpixel((0, x),254)
 for x in range(64):
-    Hexgradient.putpixel((0,64+x),254-x)
+    Hexgradient.putpixel((0, 64+x),254-x)
 for x in range(128):
-    Hexgradient.putpixel((0,127+x),190-int(1.5*x))
+    Hexgradient.putpixel((0, 127+x),190-int(1.5*x))
 
 # create a horizontal gradient...
 gradient = Image.new('L', (255, 1))
@@ -234,15 +234,15 @@ def main(filename):
     elif deck_list.game == decklist.HEX:
         fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 16)
         fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), 18)
-        title = Image.new("RGB", (320,34), "black")
+        title = Image.new("RGB", (320, 34), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
         for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
             #print nametitle,nshard
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard,'')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard+'.png')).resize((20,20))
-                title.paste(newshard,(10+nshard*20,7))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana',shard+'.png')).resize((20, 20))
+                title.paste(newshard,(10+nshard*20, 7))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text((15 + nshard * 20, 12), os.path.basename(nametitle), (250, 250, 250), font=fnt_title)
@@ -285,10 +285,10 @@ def main(filename):
     global deck2
     deck2 = Image.new("RGB", (deckwidth2, deckheight2), "white")
 
-    deck.paste(title, (0,0))
+    deck.paste(title, (0, 0))
     #for scrolling decklist
     title2 = title.crop((0, 0, 270, 34))
-    deck2.paste(title2, (0,0))
+    deck2.paste(title2, (0, 0))
 
     #now read the decklist
     if deck_list.game == decklist.MTG:
@@ -308,7 +308,7 @@ def main(filename):
                 nstep = nstep + 1
 
             if doSideboard:
-                deck.paste(sideboard, (0,34*nstep))
+                deck.paste(sideboard, (0, 34*nstep))
                 #for scrolling decklist
                 sideboard2 = sideboard.crop((0, 0, 270, 34))
                 deck2.paste(sideboard2, (270*nstep,0))
@@ -362,12 +362,12 @@ def main(filename):
             typeCM = cmdr.set
 
             drawbanner = ImageDraw.Draw(banner)
-            drawbanner.text((15,15), str(cmdr.name), (250,250,250), font=fnt_title)
+            drawbanner.text((15, 15), str(cmdr.name), (250, 250, 250), font=fnt_title)
 
             lookupScan = scraper.download_scanHexCM(cmdr.name, guid, typeCM)
 
             mainguyImg = Image.open(lookupScan)
-            mainguycut = mainguyImg.crop((135,55,185,275))
+            mainguycut = mainguyImg.crop((135, 55, 185, 275))
 
             banner = banner.rotate(90, expand=True)
 
@@ -381,16 +381,16 @@ def main(filename):
             #put alpha in the alpha band of im...
             mainguycut.putalpha(alpha)
 
-            banner.paste(mainguycut, (0,0), mask=mainguycut)
+            banner.paste(mainguycut, (0, 0), mask=mainguycut)
 
-            deck.paste(banner, (0,35))
+            deck.paste(banner, (0, 35))
 
         for card in deck_list.mainboard:
             draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
             nstep = nstep + 1
 
         if doSideboard:
-            deck.paste(sideboard, (50,35*nstep))
+            deck.paste(sideboard, (50, 35 * nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
                 draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
