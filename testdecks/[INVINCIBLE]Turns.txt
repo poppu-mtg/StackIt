@@ -1,0 +1,32 @@
+Champion: Winter Moon
+
+Troops
+2x Cyclone Shaper
+
+Spells
+4x Arcane Focus
+1x Psychic Ascension
+1x Academy of Cerulea
+4x Change Course
+4x Chlorophyllia
+4x Lullaby
+4x Peek
+1x Scheme
+1x Time Ripple
+4x Oracle Song
+4x Mastery of Time
+3x Zodiac Divination
+
+Resources
+9x Sapphire Shard
+2x Shard of Instinct
+4x Well of Instinct
+8x Wild Shard
+
+Reserves
+3x Harvest Moon
+1x Psychic Ascension
+4x Carnasaurus
+2x Time Ripple
+2x Verdict of the Ancient Kings
+3x Wrathwood Master Moss
