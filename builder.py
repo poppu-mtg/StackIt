@@ -283,20 +283,20 @@ def main(filename):
     # create a header with the deck's name
     global fnt
     if deck_list.game == decklist.MTG:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'mtg')), MTG_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'mtg')), MTG_TITLE_FONT_SIZE)
         title = Image.new("RGB", (DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text(MTG_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.POKEMON:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'pkmn')), POKEMON_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'pkmn')), POKEMON_TITLE_FONT_SIZE)
         title = Image.new("RGB", (HEX_DECK_WIDTH, OUTER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text(POKEMON_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.HEX:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'hex')), HEX_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'hex')), HEX_TITLE_FONT_SIZE)
         title = Image.new("RGB", (HEX_MASTER_DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
