@@ -9,7 +9,5 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 script:
-  - find testdecks/ -name "*.txt" -print0 | xargs -0 python StackIt.py
-  - find testdecks/ -name "*.dec" -print0 | xargs -0 python StackIt.py
-  - find testdecks/ -name "*.dek" -print0 | xargs -0 python StackIt.py
+  - python StackIt.py --automatedtest
   - python GUIapp.py --automatedtest
