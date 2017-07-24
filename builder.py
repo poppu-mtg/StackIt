@@ -36,6 +36,7 @@ SCROLLING_DECK_WIDTH = DECK_WIDTH - SCROLLING_DECK_WIDTH_ADJUSTMENT
 # Image Positioning
 HEX_MANA_COST_LEFT = 10
 HEX_MANA_COST_TOP = 7
+HEX_MANA_COST_SIZE = 20
 HEX_BANNER_TOP = 50
 SIDEBOARD_LEFT = 50
 MTG_CMC_OFFSET_TOP = 8
@@ -333,9 +334,13 @@ def main(filename):
     elif deck_list.game == decklist.POKEMON:
         deckwidth = HEX_DECK_WIDTH
         deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
+        deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
+        deckheight2 = INNER_ENTRY_HEIGHT
     elif deck_list.game == decklist.HEX:
         deckwidth = HEX_MASTER_DECK_WIDTH
         deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
+        deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
+        deckheight2 = INNER_ENTRY_HEIGHT
 
     #reset the sideboard marker
     isSideboard = 0
