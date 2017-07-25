@@ -1,4 +1,4 @@
-import os, json
+import json, os, re
 import requests
 import config, globals
 
@@ -241,7 +241,11 @@ def scryfall_mtgo(cardname, id):
 
 def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
-    text = text.encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
+    try:
+        text = text.encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
+    except TypeError:
+        # Already a unicode string
+        text = re.sub(r'Pok.?.?mon', 'Pokemon', text)
     return text
 
 def store(url, filename):
