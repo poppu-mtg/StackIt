@@ -11,6 +11,7 @@ cards:
   forest: unh
 options:
   display_sideboard: yes
+  indent_hex_title: no
 fonts:
   mtg: belerensmallcaps-bold-webfont.ttf
   pkmn: ufonts.com_humanist521bt-ultrabold-opentype.otf

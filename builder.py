@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 
 #Image manipulation
 from PIL import Image
@@ -74,6 +74,11 @@ HEX_TITLE_LEFT = 15
 HEX_TITLE_TOP = 12
 SIDEBOARD_TITLE_POSITION = (10, 7)
 HEX_BANNER_POSITION = (15, 15)
+
+if config.Get('options', 'indent_hex_title'):
+    TITLE_INDENT = TEXT_PASTE_LEFT
+else:
+    TITLE_INDENT = 0
 
 # Type Sizes
 MTG_FONT_SIZE = 14
@@ -300,14 +305,15 @@ def main(filename):
         title = Image.new("RGB", (HEX_MASTER_DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
-        for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
+        for re_match in re.finditer(r'(\[[^\]]*\])', nametitle):
+            shard = re_match.group(0)
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard, '')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE), FILTER)
-                title.paste(newshard, (HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'hexicons', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE), FILTER)
+                title.paste(newshard, (TITLE_INDENT + HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((HEX_TITLE_LEFT + nshard * HEX_MANA_COST_IMAGE_SIZE, HEX_TITLE_TOP), os.path.basename(nametitle), NEARLY_WHITE, font=fnt_title)
+        drawtitle.text((TITLE_INDENT + HEX_TITLE_LEFT + nshard * HEX_MANA_COST_IMAGE_SIZE, HEX_TITLE_TOP), os.path.basename(nametitle), NEARLY_WHITE, font=fnt_title)
 
     ncountMB = len(deck_list.mainboard)
     ncountSB = len(deck_list.sideboard)
@@ -457,7 +463,7 @@ def main(filename):
             nstep = nstep + 1
 
         if doSideboard:
-            deck.paste(sideboard, (SIDEBOARD_LEFT, ENTRY_HEIGHT * nstep))
+            deck.paste(sideboard, (SIDEBOARD_LEFT, OUTER_ENTRY_HEIGHT * nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
                 draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
