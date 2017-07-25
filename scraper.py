@@ -2,6 +2,12 @@ import os, json
 import requests
 import config, globals
 
+from cachecontrol import CacheControl
+from cachecontrol.caches.file_cache import FileCache
+
+SESSION = CacheControl(requests.Session(),
+                       cache=FileCache(os.path.join(globals.CACHE_PATH, '.web_cache')))
+
 #needed to remove the accent in 'Pokemon'
 import unicodedata
 
@@ -23,7 +29,7 @@ def download_scan(name, expansion, number):
         return lookupScan
 
     scanweb = 'http://www.magiccards.info/{set}/en.html'.format(set=expansion)
-    scanpage = requests.get(scanweb)
+    scanpage = SESSION.get(scanweb)
     scantree = html.fromstring(scanpage.content)
 
     if name.find('/') != -1:
@@ -52,7 +58,7 @@ def download_scan(name, expansion, number):
 
 def download_scanPKMN(name, expansion, expID):
     if globals.PY3:
-        name = name[:-1]
+        name = unaccent(name[:-1])
     else:
         name = unaccent(name[:-1].decode('latin-1'))
     displayname = name
@@ -189,7 +195,7 @@ def get_json(cardname, expansion):
     else:
         splitcard = False
 
-    js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
+    js = SESSION.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
     blob = json.loads(js.text)
     card = blob['cards'][0]
     mana_cost = card.get('manaCost', None)
@@ -205,7 +211,7 @@ def get_json(cardname, expansion):
                 break
 
     if splitcard:
-        js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
+        js = SESSION.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
         blob = json.loads(js.text)
         card = blob['cards'][0]
         mana_cost = mana_cost + ' // ' + card.get('manaCost', None)
@@ -213,11 +219,11 @@ def get_json(cardname, expansion):
     return expansion, mana_cost, typeline, number
 
 def scryfall_mtgo(cardname, id):
-    blob = requests.get('http://api.scryfall.com/cards/mtgo/{0}'.format(id)).text
+    blob = SESSION.get('http://api.scryfall.com/cards/mtgo/{0}'.format(id)).text
     blob = json.loads(blob)
     if blob['object'] == 'error': # Sadface
         print('WARNING: MTGO id {id} ({name}) is not known to Scryfall.'.format(id=id, name=cardname))
-        blob = requests.get('http://api.scryfall.com/cards/named?exact={0}'.format(cardname)).text
+        blob = SESSION.get('http://api.scryfall.com/cards/named?exact={0}'.format(cardname)).text
         blob = json.loads(blob)
 
     expansion = blob['set']
@@ -240,7 +246,7 @@ def unaccent(text):
 
 def store(url, filename):
     print('Downloading {0}'.format(url))
-    r = requests.get(url, stream=True)
+    r = SESSION.get(url, stream=True)
     with open(filename, 'wb') as f:
         for chunk in r.iter_content(1024):
             f.write(chunk)

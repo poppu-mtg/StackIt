@@ -9,3 +9,4 @@ testdecks/*.png
 dist/
 build/
 sample.png
+.web_cache/
