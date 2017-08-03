@@ -1,5 +1,5 @@
 import os, yaml
-import globals
+from StackIt import globals
 
 SETTINGS = None
 DEFAULTS = yaml.load("""

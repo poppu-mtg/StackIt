@@ -1,6 +1,6 @@
 import json, os, re
 import requests
-import config, globals
+from StackIt import config, globals
 
 from cachecontrol import CacheControl
 from cachecontrol.caches.file_cache import FileCache
@@ -12,7 +12,7 @@ SESSION = CacheControl(requests.Session(),
 import unicodedata
 
 from lxml import html
-from globals import Card, specmana, mtgreprints
+from StackIt.globals import Card, specmana, mtgreprints
 
 def download_scan(name, expansion, number):
     if number is None:

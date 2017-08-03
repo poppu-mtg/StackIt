@@ -1,5 +1,5 @@
 import os, shutil, sys, time
-import builder
+from StackIt import builder
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
