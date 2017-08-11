@@ -9,5 +9,4 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 script:
-  - python StackIt/StackIt.py --automatedtest
-  - python StackIt/GUIapp.py --automatedtest
+  - python StackIt.py --automatedtest

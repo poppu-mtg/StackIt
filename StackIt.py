@@ -19,6 +19,7 @@ if __name__ == "__main__":
                 builder.main(deck)
             for deck in glob.glob('testdecks/*.de[ck]'):
                 builder.main(deck)
+            GUIapp.main()
         elif os.path.isdir(sys.argv[1]):
             watcher.main(sys.argv[1])
         else:
