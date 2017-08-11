@@ -17,7 +17,7 @@ here = path.abspath(path.dirname(__file__))
 #     long_description = f.read()
 
 setup(
-    name='StackIt',
+    name='StackItDecklist',
     version='1.4.0',
     description='Generates visual decklists for various TCGs',
     url='https://github.com/poppu-mtg/StackIt',

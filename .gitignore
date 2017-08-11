@@ -10,4 +10,5 @@ dist/
 build/
 sample.png
 .web_cache/
-StackIt.egg-info/*
+StackItDecklist.egg-info/
+.vs/*
