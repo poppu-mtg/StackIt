@@ -8,8 +8,8 @@ import xml.etree.ElementTree
 from lxml import html
 import requests
 
-import scraper, config, globals
-from globals import Card, List
+from StackIt import scraper, config, globals
+from StackIt.globals import Card, List
 
 MTG = 1
 POKEMON = 2

@@ -1,4 +1,6 @@
 import collections, os, sys
+from os import path
+import appdirs
 
 # Named Tuple that defines the attribues of a card.
 Card = collections.namedtuple('Card', ['name', 'set', 'cost', 'quantity', 'collector_num'])
@@ -31,21 +33,25 @@ if getattr(sys, 'frozen', False):
     print('Using Bundled Python')
     localdir = sys._MEIPASS
     globaldir = os.path.dirname(sys.executable)
+    bundled = True
 else:
     print('Running on python ' + sys.version)
-    localdir = sys.path[0]
-    globaldir = sys.path[0]
+    localdir = path.abspath(path.dirname(__file__))
+    globaldir = appdirs.user_data_dir('StackIt')
+    bundled = False
 
 PY3 = sys.version_info > (3, 0)
 
 # print("DIR={0}".format(localdir))
-CACHE_PATH = os.path.join(globaldir, 'cache')
+CACHE_PATH = appdirs.user_cache_dir('StackIt')
 RESOURCES_PATH = os.path.join(localdir, 'resources')
 
 SCAN_PATH = os.path.join(CACHE_PATH, 'Scans')
 CMC_PATH = os.path.join(CACHE_PATH, 'manacosts')
 
 def mkcachepaths():
+    if not os.path.exists(globaldir):
+        os.makedirs(globaldir)
     if not os.path.exists(CACHE_PATH):
         os.mkdir(CACHE_PATH)
     if not os.path.exists(SCAN_PATH):
@@ -53,3 +59,4 @@ def mkcachepaths():
     if not os.path.exists(CMC_PATH):
         os.mkdir(CMC_PATH)
 
+mkcachepaths()

@@ -14,8 +14,8 @@ import xml.etree.ElementTree
 #HTML parsing
 from lxml import html
 
-import scraper, config, decklist, globals
-from globals import Card, specmana, aftermath
+from StackIt import scraper, config, decklist, globals
+from StackIt.globals import Card, specmana, aftermath
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 

@@ -1,7 +1,7 @@
 import os, yaml
-import globals
+from StackIt import globals
 
-SETTINGS = dict()
+SETTINGS = None
 DEFAULTS = yaml.load("""
 cards:
   plains: unh
@@ -17,14 +17,18 @@ fonts:
   pkmn: ufonts.com_humanist521bt-ultrabold-opentype.otf
   hex: Arial Bold.ttf
 """)
+settingsfile = os.path.join(globals.globaldir, 'settings.yml')
+
+if os.path.exists('settings.yml'):
+    settingsfile = 'settings.yml'
 
 def init():
     global SETTINGS
-    if not os.path.exists(os.path.join(globals.globaldir, 'settings.yml')):
+    if not os.path.exists(settingsfile):
         SETTINGS = DEFAULTS
         Save()
 
-    with open('settings.yml') as f:
+    with open(settingsfile) as f:
         SETTINGS = yaml.load(f)
         if SETTINGS is None:
             # File exists, but is empty
@@ -40,6 +44,8 @@ def init():
     print(yaml.dump(SETTINGS))
 
 def Get(group, name):
+    if SETTINGS is None:
+        init()
     try:
         return SETTINGS[group][name]
     except KeyError:
@@ -51,7 +57,5 @@ def Get(group, name):
             return None
 
 def Save():
-    with open('settings.yml', 'w') as f:
+    with open(settingsfile, 'w') as f:
         f.write(yaml.dump(SETTINGS, default_flow_style=False))
-
-init()
