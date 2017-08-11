@@ -18,7 +18,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='StackItDecklist',
-    version='1.4.0',
+    version='1.4.1',
     description='Generates visual decklists for various TCGs',
     url='https://github.com/poppu-mtg/StackIt',
     author='Guillaume Robert-Demolaize & Katelyn Gigante',
