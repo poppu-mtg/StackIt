@@ -53,10 +53,10 @@ def mkcachepaths():
     if not os.path.exists(globaldir):
         os.makedirs(globaldir)
     if not os.path.exists(CACHE_PATH):
-        os.mkdir(CACHE_PATH)
+        os.makedirs(CACHE_PATH)
     if not os.path.exists(SCAN_PATH):
-        os.mkdir(SCAN_PATH)
+        os.makedirs(SCAN_PATH)
     if not os.path.exists(CMC_PATH):
-        os.mkdir(CMC_PATH)
+        os.makedirs(CMC_PATH)
 
 mkcachepaths()
