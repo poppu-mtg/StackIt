@@ -1,6 +1,5 @@
 import os, sys, time
-import globals
-import builder
+from StackIt import globals, builder
 
 if sys.version_info.major == 3:
     from tkinter import *

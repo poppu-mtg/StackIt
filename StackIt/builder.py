@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 
 #Image manipulation
 from PIL import Image
@@ -14,8 +14,8 @@ import xml.etree.ElementTree
 #HTML parsing
 from lxml import html
 
-import scraper, config, decklist, globals
-from globals import Card, specmana, aftermath
+from StackIt import scraper, config, decklist, globals
+from StackIt.globals import Card, specmana, aftermath
 
 #ensure that mana costs greater than 9 (Kozilek, Emrakul...) aren't misaligned
 
@@ -39,6 +39,7 @@ SCROLLING_DECK_WIDTH = DECK_WIDTH - SCROLLING_DECK_WIDTH_ADJUSTMENT
 # Image Positioning
 HEX_MANA_COST_LEFT = 10 * QUALITY_MULTIPLIER
 HEX_MANA_COST_TOP = 7 * QUALITY_MULTIPLIER
+HEX_MANA_COST_SIZE = 20 * QUALITY_MULTIPLIER
 HEX_BANNER_TOP = 50 * QUALITY_MULTIPLIER
 SIDEBOARD_LEFT = 50 * QUALITY_MULTIPLIER
 MTG_CMC_OFFSET_TOP = 8 * QUALITY_MULTIPLIER
@@ -76,6 +77,11 @@ HEX_TITLE_LEFT = 15 * QUALITY_MULTIPLIER
 HEX_TITLE_TOP = 12 * QUALITY_MULTIPLIER
 SIDEBOARD_TITLE_POSITION = (10 * QUALITY_MULTIPLIER, 7 * QUALITY_MULTIPLIER)
 HEX_BANNER_POSITION = (15 * QUALITY_MULTIPLIER, 15 * QUALITY_MULTIPLIER)
+
+if config.Get('options', 'indent_hex_title'):
+    TITLE_INDENT = TEXT_PASTE_LEFT
+else:
+    TITLE_INDENT = 0
 
 # Type Sizes
 MTG_FONT_SIZE = 14 * QUALITY_MULTIPLIER
@@ -288,31 +294,32 @@ def main(filename):
     # create a header with the deck's name
     global fnt
     if deck_list.game == decklist.MTG:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'belerensmallcaps-bold-webfont.ttf'), MTG_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'mtg')), MTG_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'mtg')), MTG_TITLE_FONT_SIZE)
         title = Image.new("RGB", (DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text(MTG_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.POKEMON:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'ufonts.com_humanist521bt-ultrabold-opentype.otf'), POKEMON_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'pkmn')), POKEMON_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'pkmn')), POKEMON_TITLE_FONT_SIZE)
         title = Image.new("RGB", (HEX_DECK_WIDTH, OUTER_ENTRY_HEIGHT), "black")
         drawtitle = ImageDraw.Draw(title)
         drawtitle.text(POKEMON_TITLE_POSITION, os.path.basename(str(filename))[0:-4], NEARLY_WHITE, font=fnt_title)
     elif deck_list.game == decklist.HEX:
-        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_FONT_SIZE)
-        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', 'Arial Bold.ttf'), HEX_TITLE_FONT_SIZE)
+        fnt = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'hex')), HEX_FONT_SIZE)
+        fnt_title = ImageFont.truetype(os.path.join(globals.RESOURCES_PATH, 'fonts', config.Get('fonts', 'hex')), HEX_TITLE_FONT_SIZE)
         title = Image.new("RGB", (HEX_MASTER_DECK_WIDTH, INNER_ENTRY_HEIGHT), "black")
         nametitle = str(filename)[0:-4]
         nshard = 0
-        for shard in ['[DIAMOND]', '[SAPPHIRE]', '[BLOOD]', '[RUBY]', '[WILD]']:
+        for re_match in re.finditer(r'(\[[^\]]*\])', nametitle):
+            shard = re_match.group(0)
             if nametitle.find(shard) != -1:
                 nametitle = nametitle.replace(shard, '')
-                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'mana', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE), FILTER)
-                title.paste(newshard, (HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
+                newshard = Image.open(os.path.join(globals.RESOURCES_PATH, 'hexicons', shard + '.png')).resize((HEX_MANA_COST_IMAGE_SIZE, HEX_MANA_COST_IMAGE_SIZE), FILTER)
+                title.paste(newshard, (TITLE_INDENT + HEX_MANA_COST_LEFT + nshard * HEX_MANA_COST_SIZE, HEX_MANA_COST_TOP))
                 nshard = nshard + 1
         drawtitle = ImageDraw.Draw(title)
-        drawtitle.text((HEX_TITLE_LEFT + nshard * HEX_MANA_COST_IMAGE_SIZE, HEX_TITLE_TOP), os.path.basename(nametitle), NEARLY_WHITE, font=fnt_title)
+        drawtitle.text((TITLE_INDENT + HEX_TITLE_LEFT + nshard * HEX_MANA_COST_IMAGE_SIZE, HEX_TITLE_TOP), os.path.basename(nametitle), NEARLY_WHITE, font=fnt_title)
 
     ncountMB = len(deck_list.mainboard)
     ncountSB = len(deck_list.sideboard)
@@ -339,9 +346,13 @@ def main(filename):
     elif deck_list.game == decklist.POKEMON:
         deckwidth = HEX_DECK_WIDTH
         deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
+        deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
+        deckheight2 = INNER_ENTRY_HEIGHT
     elif deck_list.game == decklist.HEX:
         deckwidth = HEX_MASTER_DECK_WIDTH
         deckheight = OUTER_ENTRY_HEIGHT * (ncount + 1)
+        deckwidth2 = SCROLLING_DECK_WIDTH * (ncount + 1)
+        deckheight2 = INNER_ENTRY_HEIGHT
 
     #reset the sideboard marker
     isSideboard = 0
@@ -458,7 +469,7 @@ def main(filename):
             nstep = nstep + 1
 
         if doSideboard:
-            deck.paste(sideboard, (SIDEBOARD_LEFT, ENTRY_HEIGHT * nstep))
+            deck.paste(sideboard, (SIDEBOARD_LEFT, OUTER_ENTRY_HEIGHT * nstep))
             nstep = nstep + 1
             for card in deck_list.sideboard:
                 draw_hex_card(card.name, card.collector_num, card.quantity, nstep)
@@ -473,9 +484,9 @@ def main(filename):
         deck = deck.crop((0, 0, deckwidth - HEX_WIDTH_CROP_RIGHT, deckheight))
 
     output_path = str(filename)[0:-4] + ".png"
-#    if QUALITY_MULTIPLIER != 1:
-#        width, height = deck.size
-#        deck = deck.resize((int(width / QUALITY_MULTIPLIER), int(height / QUALITY_MULTIPLIER)), FILTER)
+    if QUALITY_MULTIPLIER != 1:
+        width, height = deck.size
+        deck = deck.resize((int(width / QUALITY_MULTIPLIER), int(height / QUALITY_MULTIPLIER)), FILTER)
     deck.save(output_path)
     #for scrolling decklist
     output_path2 = str(filename)[0:-4] + "-scroll.png"

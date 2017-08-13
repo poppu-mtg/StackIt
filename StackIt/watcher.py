@@ -1,5 +1,5 @@
 import os, shutil, sys, time
-import builder
+from StackIt import builder
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -23,11 +23,16 @@ class StackItEventHandler(FileSystemEventHandler):
         print(event.src_path)
         if islist(event):
             time.sleep(1)
+            static_scroll = self.static_img[:-4] + "-scroll.png"
             if os.path.exists(self.static_img):
                 os.remove(self.static_img)
+            if os.path.exists(static_scroll):
+                os.remove(static_scroll)
+
             try:
                 res = builder.main(event.src_path)
                 shutil.copyfile(res, self.static_img)
+                shutil.copyfile(res[:-4] + "-scroll.png", static_scroll)
             except Exception as e:
                 print(e)
 
