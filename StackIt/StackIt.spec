@@ -1,10 +1,13 @@
 # -*- mode: python -*-
 
+import os, shutil
+
 block_cipher = None
 
+shutil.copyfile('../StackIt.py', 'StackIt.py')
 
 a = Analysis(['StackIt.py'],
-             pathex=['C:\\Users\\Clock\\Documents\\Projects\\StackIt'],
+             pathex=['.'],
              binaries=[],
              datas=[('resources', 'resources')],
              hiddenimports=[],
@@ -26,3 +29,5 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=True )
+
+os.remove('StackIt.py')

@@ -3,3 +3,5 @@ pillow
 requests
 pyYAML
 watchdog
+cachecontrol[filecache]
+appdirs

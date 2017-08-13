@@ -8,8 +8,8 @@ import xml.etree.ElementTree
 from lxml import html
 import requests
 
-import scraper, config, globals
-from globals import Card, List
+from StackIt import scraper, config, globals
+from StackIt.globals import Card, List
 
 MTG = 1
 POKEMON = 2
@@ -38,12 +38,13 @@ def parse_list(decklist):
             continue
 
         # Identify game
+        if line.lower().find('mon trading card game deck list') != -1:
+            print('Decklist is for Pokemon TCGO ...')
+            game = POKEMON
+            isSideboard = False
+
         if line[0] in ['#', '*']:
-            if line.lower().find('* pok') != -1:
-                print('Decklist is for Pokemon TCGO ...')
-                game = POKEMON
-                isSideboard = False
-            elif line[2].isdigit():
+            if line[2].isdigit():
                 line = line[2:]
             else:
                 continue

@@ -1,12 +1,18 @@
-import os, json
+import json, os, re
 import requests
-import config, globals
+from StackIt import config, globals
+
+from cachecontrol import CacheControl
+from cachecontrol.caches.file_cache import FileCache
+
+SESSION = CacheControl(requests.Session(),
+                       cache=FileCache(os.path.join(globals.CACHE_PATH, '.web_cache')))
 
 #needed to remove the accent in 'Pokemon'
 import unicodedata
 
 from lxml import html
-from globals import Card, specmana, mtgreprints
+from StackIt.globals import Card, specmana, mtgreprints
 
 def download_scan(name, expansion, number):
     if number is None:
@@ -23,11 +29,11 @@ def download_scan(name, expansion, number):
         return lookupScan
 
     scanweb = 'http://www.magiccards.info/{set}/en.html'.format(set=expansion)
-    scanpage = requests.get(scanweb)
+    scanpage = SESSION.get(scanweb)
     scantree = html.fromstring(scanpage.content)
 
     if name.find('/') != -1:
-        name = name.split('/')[0]+' ('+name+')'
+        name = name.split('/')[0] + ' (' + name + ')'
 
     scannumber = scantree.xpath('//a[text()="{name}"]/@href'.format(name=name))
     # print(scannumber)
@@ -44,15 +50,15 @@ def download_scan(name, expansion, number):
 
     expansion = cardloc[1]
     number = cardloc[3].strip('.')
-    url = 'http://magiccards.info/scans/en/'+expansion+'/'+number+'.jpg'
-    store(url, number+'.jpg')
+    url = 'http://magiccards.info/scans/en/' + expansion + '/' + number + '.jpg'
+    store(url, number + '.jpg')
     os.rename(number + '.jpg', lookupScan)
 
     return lookupScan
 
 def download_scanPKMN(name, expansion, expID):
     if globals.PY3:
-        name = name[:-1]
+        name = unaccent(name[:-1])
     else:
         name = unaccent(name[:-1].decode('latin-1'))
     displayname = name
@@ -74,16 +80,16 @@ def download_scanPKMN(name, expansion, expID):
 
 def download_scanHexCM(mainguy, mainguyscan, typeCM):
     mainguy2 = ''.join(e for e in mainguy if e.isalnum())
-    localname = 'HexTCG-'+mainguy2+'_'+typeCM+'.jpg'
+    localname = 'HexTCG-' + mainguy2 + '_' + typeCM + '.jpg'
     lookupScan = os.path.join(globals.SCAN_PATH, localname)
 
     if os.path.exists(lookupScan):
         return lookupScan
 
     if mainguyscan == 'cardback-big':
-        url = 'https://hex.tcgbrowser.com/images/cards/'+mainguyscan+'.jpg'
+        url = 'https://hex.tcgbrowser.com/images/cards/' + mainguyscan + '.jpg'
     else:
-        url = 'https://storage.hex.tcgbrowser.com/big/'+mainguyscan+'.jpg'
+        url = 'https://storage.hex.tcgbrowser.com/big/' + mainguyscan + '.jpg'
         #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
     store(url, localname)
     os.rename(localname, lookupScan)
@@ -92,13 +98,13 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
 
 def download_scanHex(name, namescan):
     name2 = ''.join(e for e in name if e.isalnum())
-    localname = 'HexTCG-'+name2+'.jpg'
+    localname = 'HexTCG-' + name2 + '.jpg'
     lookupScan = os.path.join(globals.SCAN_PATH, localname)
 
     if os.path.exists(lookupScan):
         return lookupScan
 
-    url = 'https://storage.hex.tcgbrowser.com/big/'+namescan+'.jpg'
+    url = 'https://storage.hex.tcgbrowser.com/big/' + namescan + '.jpg'
     #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
     store(url, localname)
     os.rename(localname, lookupScan)
@@ -189,7 +195,7 @@ def get_json(cardname, expansion):
     else:
         splitcard = False
 
-    js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
+    js = SESSION.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=cardname))
     blob = json.loads(js.text)
     card = blob['cards'][0]
     mana_cost = card.get('manaCost', None)
@@ -205,7 +211,7 @@ def get_json(cardname, expansion):
                 break
 
     if splitcard:
-        js = requests.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
+        js = SESSION.get('http://api.magicthegathering.io/v1/cards?name="{cardname}"'.format(cardname=altname))
         blob = json.loads(js.text)
         card = blob['cards'][0]
         mana_cost = mana_cost + ' // ' + card.get('manaCost', None)
@@ -213,11 +219,11 @@ def get_json(cardname, expansion):
     return expansion, mana_cost, typeline, number
 
 def scryfall_mtgo(cardname, id):
-    blob = requests.get('http://api.scryfall.com/cards/mtgo/{0}'.format(id)).text
+    blob = SESSION.get('http://api.scryfall.com/cards/mtgo/{0}'.format(id)).text
     blob = json.loads(blob)
     if blob['object'] == 'error': # Sadface
         print('WARNING: MTGO id {id} ({name}) is not known to Scryfall.'.format(id=id, name=cardname))
-        blob = requests.get('http://api.scryfall.com/cards/named?exact={0}'.format(cardname)).text
+        blob = SESSION.get('http://api.scryfall.com/cards/named?exact={0}'.format(cardname)).text
         blob = json.loads(blob)
 
     expansion = blob['set']
@@ -230,17 +236,21 @@ def scryfall_mtgo(cardname, id):
     lookupScan = os.path.join(globals.SCAN_PATH, localname)
     if not os.path.exists(lookupScan):
         store(blob['image_uri'], lookupScan)
-    
+
     return expansion, mana_cost, typeline, number
 
 def unaccent(text):
     text =  ''.join((c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'))
-    text = text.encode('ASCII', 'ignore').replace('PokAmon','Pokemon')
+    try:
+        text = text.encode('ASCII', 'ignore').replace('PokAmon', 'Pokemon')
+    except TypeError:
+        # Already a unicode string
+        text = re.sub(r'Pok.?.?mon', 'Pokemon', text)
     return text
 
 def store(url, filename):
     print('Downloading {0}'.format(url))
-    r = requests.get(url, stream=True)
+    r = SESSION.get(url, stream=True)
     with open(filename, 'wb') as f:
         for chunk in r.iter_content(1024):
             f.write(chunk)

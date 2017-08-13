@@ -1,0 +1,7 @@
+include *.md
+include *.py
+include *.txt
+recursive-include StackIt *.png
+recursive-include StackIt *.spec
+recursive-include StackIt *.ttf
+recursive-include StackIt *.otf
