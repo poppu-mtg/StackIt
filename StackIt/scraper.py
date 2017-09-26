@@ -1,6 +1,6 @@
 import json, os, re
 import requests
-from StackIt import config, globals
+from . import config, globals
 
 from cachecontrol import CacheControl
 from cachecontrol.caches.file_cache import FileCache
@@ -250,7 +250,7 @@ def unaccent(text):
 
 def store(url, filename):
     print('Downloading {0}'.format(url))
-    r = SESSION.get(url, stream=True)
+    r = requests.get(url, stream=True)
     with open(filename, 'wb') as f:
         for chunk in r.iter_content(1024):
             f.write(chunk)
