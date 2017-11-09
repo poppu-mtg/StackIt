@@ -235,7 +235,7 @@ def scryfall_mtgo(cardname, id):
     localname = '_'.join([name2, expansion, number]) + '.jpg'
     lookupScan = os.path.join(globals.SCAN_PATH, localname)
     if not os.path.exists(lookupScan):
-        store(blob['image_uri'], lookupScan)
+        store(blob['image_uris']['large'], lookupScan)
 
     return expansion, mana_cost, typeline, number
 
