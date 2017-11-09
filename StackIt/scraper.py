@@ -1,4 +1,4 @@
-import json, os, re
+import json, os, re, shutil
 import requests
 from . import config, globals
 
@@ -52,7 +52,7 @@ def download_scan(name, expansion, number):
     number = cardloc[3].strip('.')
     url = 'http://magiccards.info/scans/en/' + expansion + '/' + number + '.jpg'
     store(url, number + '.jpg')
-    os.rename(number + '.jpg', lookupScan)
+    shutil.move(number + '.jpg', lookupScan)
 
     return lookupScan
 
@@ -74,7 +74,7 @@ def download_scanPKMN(name, expansion, expID):
     pokeurl = 'https://s3.amazonaws.com/pokegoldfish/images/gf/{name}-{expansion}-{expID}.jpg'.format(name=name, expansion=expansion, expID=expID)
     print(pokeurl)
     store(pokeurl, localname)
-    os.rename(localname, lookupScan)
+    shutil.move(localname, lookupScan)
 
     return lookupScan, displayname
 
@@ -92,7 +92,7 @@ def download_scanHexCM(mainguy, mainguyscan, typeCM):
         url = 'https://storage.hex.tcgbrowser.com/big/' + mainguyscan + '.jpg'
         #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
     store(url, localname)
-    os.rename(localname, lookupScan)
+    shutil.move(localname, lookupScan)
 
     return lookupScan
 
@@ -107,7 +107,7 @@ def download_scanHex(name, namescan):
     url = 'https://storage.hex.tcgbrowser.com/big/' + namescan + '.jpg'
     #card scans are labeled via set number -> need to rename the file temporarily to avoid potential overwriting until decklist is finalized
     store(url, localname)
-    os.rename(localname, lookupScan)
+    shutil.move(localname, lookupScan)
 
     return lookupScan
 

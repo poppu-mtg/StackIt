@@ -1,4 +1,4 @@
-import os, sys, time
+import os, shutil, sys, time
 from . import globals, builder
 
 if sys.version_info.major == 3:
@@ -60,7 +60,7 @@ def OpenPro1():
         if os.path.exists(os.path.join(globals.CACHE_PATH, deckname)):
             os.remove(os.path.join(globals.CACHE_PATH, deckname))
 
-        os.rename(deckname, os.path.join(globals.CACHE_PATH, deckname))
+        shutil.move(deckname, os.path.join(globals.CACHE_PATH, deckname))
 
     novi = Toplevel()
     canvas = Canvas(novi, width = 350, height = 1000)
